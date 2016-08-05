@@ -1,0 +1,61 @@
+---
+title: "Introduction"
+author: "Jeff Hughes"
+date: "August 5, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Learning R Tutorial
+
+## Introduction: The Middle Way
+
+Welcome to the Learning R tutorial!
+
+There are a huge number of tutorials out there for learning R, many of them available online for free. So why use this one? Well, when I first learned R, I was frustrated that there didn't seem to be a tutorial covering all I needed to know. Most tutorials can be categorized into one of two types:
+
+* R taught from a programming angle, or
+* R taught from a statistical angle.
+
+The first type of tutorial covers the basic "building blocks" of R, such as variables, functions, and loops. However, most don't do a really good job of indicating how one uses those simple structures when dealing with complex datasets. It treats R as a programming language (which it is) without really giving the information that researchers would need to use it effectively. Researchers may say, "Yes, it's interesting that I can create logical vectors of TRUE and FALSE, but I don't deal with that type of data...so how does this help me?"
+
+The latter type of tutorial tends to cover statistical tools (e.g., t-tests, regression, correlation) as a bunch of cut-and-paste codes; there is typically little explanation of how to flexibly translate that into something useful for your own research. For example, what happens when a particular functions wants a vector, but your data is in a list format? If you don't even understand what these structures are and how they work, you end up having to go back and learn all those basics anyway. This type of tutorial treats R like a statistical program (which it is) without really getting into any of the programming principles that make R useful and efficient.
+
+So if you haven't guessed, my approach to this tutorial is to try to provide a "Middle Way" that incorporates both these strategies. It is written with researchers in mind, but is designed to show you the basic programming tools along the way that will help you get the most out of R. Quite frankly, if you don't learn the programming principles of R, you might as well use a different statistical program. The fact that R is a full-fledged programming language is what makes using R so powerful. But what we will do in this tutorial is teach these programming principles "along the way" as we try to analyze a set of data. This way, we can see immediately why these basic building blocks are relevant! And hopefully we won't get bogged down in some of the arcane details of programming that aren't as relevant for researchers.
+
+## Prerequisites
+
+This tutorial already assumes that you have R installed on your machine. The most I'll say is that the installation can be found at the [Comprehensive R Archive Network (CRAN)](https://cran.r-project.org). I will also recommend that you install and use [RStudio](https://www.rstudio.com). This is a graphical interface for using R, and it is the most widely used way of interfacing with R. You can get by without it, but it makes using R much, much easier. Plus it just looks nice!
+
+This tutorial also assumes that you have some knowledge of statistical concepts like regression, ANOVA, t-tests, etc. We won't be getting into anything too complex, but this is a tutorial for learning R, not a tutorial for learning statistics. I assume that if I mention the standard deviation, that you know what that is.
+
+With all that out of the way, let's begin!
+
+## The Problem at Hand
+
+Our goal for the duration of this tutorial will be to analyze a dataset. It is available [here](PLACEHOLDER), and will be our overarching problem to be solved. We'll cover how to import the data into R, how to tidy it up, how to check the distributions of variables, and then how to analyze the data in such a way that answers the hypotheses we have about it. Along the way, I'll include additional information that is relevant, and include exercises for you to try on your own and check your answers.
+
+The dataset was produced from a study I ran examining the idea of maximization. (It combines both real and fake data for the purposes of this tutorial.) Maximizers have typically been defined as individuals who seek the best option (vs. an option that is just "good enough") and search exhaustively through the alternatives in the decision to do so (Schwartz et al., 2002). Chronic maximizing has, in previous research, been linked with more negative outcomes, such as lower life satisfaction, greater depression, and greater regret (Schwartz et al., 2002; though see Diab et al., 2008). For this study, we were interested in looking at how particular motivational orientations might influence the extent to which individuals maximized on a choice task, and thus how much frustration and regret they would feel afterwards. In particular, we were interested in promotion focus, and assessment mode.
+
+Promotion focus is a motivational orientation concerned with advancement and growth goals (Higgins, 1997). Promotion-focused individuals strive to attain ideals and are particularly concerned with approaching gains and avoiding non-gains (Scholer & Higgins, 2011; Zou & Scholer, 2016). However, promotion focus is also associated with a preference for eager (vs. vigilant) strategies to achieve goals (Scholer & Higgins, 2011). Eager strategies are approach-oriented strategies such as initiation of goals (Fuglestad, Rothman, & Jeffery, 2008), searching for matches vs. mismatches (Crowe & Higgins, 1997; Higgins et al., 2001), optimism (Grant & Higgins, 2003), and prioritizing speed over accuracy (Förster, Higgins, & Bianco, 2003). Thus, we predicted that promotion focus should be associated with wanting the best in the decision task, but not necessarily with looking through more options to find it. Thus, we predicted that promotion focus should not lead to higher frustration or regret with a decision.
+
+Assessment mode is a motivational orientation concerned with evaluating and comparing entities, such as goals and means, in pursuit of doing the "right" thing (Higgins et al., 2003). It is also associated with an emphasis on careful and comprehensive evaluation. Assessors prefer full comparison decision strategies (Avnet & Higgins, 2003) and take time to measure and evaluate alternatives on their relative quality (Mauro, Pierro, Mannetti, Higgins, & Kruglanski, 2009). Thus, we predicted that assessment mode should show the typical pattern that maximizers have shown, with greater frustration and regret after making a decision.
+
+### Our Study
+
+In this study, we manipulated promotion or assessment by giving participants a writing task that either got them to think about their hopes and aspirations, or about times in their life when they engaged in comparison and evaluation. (These are fairly typical manipulations for priming promotion and assessment.) We also had a third condition for a control group in which participants did not write anything.
+
+After this, we gave participants a decision task -- we showed them a table with information about a number of different cars, and asked them to imagine they wished to purchase a car, and to select which car they would prefer. We timed how long they took on this. Then we asked them a number of questions afterwards about their difficulty with the task, about the strategies they used to decide, and about the regret they felt. We also had established chronic measures of promotion focus, assessment mode, and maximizing.
+
+### Hypotheses
+
+So here's what we hypothesized:
+
+1. The manipulation should have an effect on decision difficulty and on regret, such that (a) the assessment condition should result in greater difficulty and regret than the control condition, but (b) the promotion condition should not show differences from the control condition.
+
+2. Chronic maximizing should also be associated with greater decision difficulty and regret (using the control condition only).
+
+We will also do some other exploratory analyses in this tutorial in order to gain experience with different statistical methods. We'll ask and answer these questions as we go along.
