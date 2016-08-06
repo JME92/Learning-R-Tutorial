@@ -1,0 +1,139 @@
+---
+title: "Viewing and Cleaning Data"
+author: "Jeff Hughes"
+date: "August 6, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r start, include=FALSE}
+data <- read.csv("data/maximizing_data.csv", stringsAsFactors=FALSE)
+```
+
+# Learning R Tutorial
+
+## Viewing and Cleaning Data
+
+Now that we have our data imported into R, we need to be able to take a look at it, make sure it looks okay, and also tidy it up so that it is ready for analysis.
+
+I'll be honest here: R does not have fantastic tools for viewing data. If you are dealing with a large dataset, things tend to get chopped up or cut off. I tend to open things up in Excel if I really want a "bird's-eye view" of the data. That's one nice advantage to keeping your data in CSV (comma-separated values) format -- many programs can read it. However, we'll first go over some of the R tools to view your data, and then work on tidying up our dataset.
+
+### Viewing data
+
+The simplest way to get a nice quick view of your data is to use the `head()` or `tail()` functions. The `head()` function will show you the first six rows of your data, and (as you might be able to infer), the `tail()` function will show the last six rows. You can also change the number of rows it shows by using the second argument: `head(data, n=10)` will show you the first ten rows, for example.
+
+If we try it on our dataset, here's what we see:
+
+```{r head}
+head(data)
+```
+
+As you can see, it will show you the first six rows, but depending on how wide your screen is, the columns can get chopped up into multiple sections. If you have a large number of columns, this can get difficult to read.
+
+Another option, perhaps more similar to other statistical programs, is the `View()` function (note the capital 'V'! R is case sensitive). If you use the base R interface, this gives you a little spreadsheet kind of similar to Excel. If you use RStudio, it also gives you some extra little features like searching, sorting, and filtering. However, although this might be a little easier on the eyes, it is still limited to 100 columns. If you have more than that, you'll either need to rely on other solutions, or you can subset your data into smaller chunks and view them one at a time. (We will get into more about subsetting in a later lesson.)
+
+Along with the `View()` function is the `edit()` function. This gives you a similar sort of spreadsheet format, but while `View()` is read-only, `edit()` lets you modify the data within that spreadsheet. Note that the output for the `edit()` function is the newly-edited data frame, so be sure to assign this output to a variable! Like so:
+
+```{r edit, eval=FALSE}
+newdata <- edit(data)
+```
+
+(You could also just assign it back into the `data` variable, that would just overwrite the previous data.) If you don't assign to a variable, it will just print all the data onto the screen without actually saving it, and you'll have made all your edits for nothing.
+
+**A note about best practices:** Generally, it is ill-advised to use the `edit()` function. It can be tempting to make quick little edits -- for instance, if someone types in the number "ten" instead of inputting 10 -- and for those who are coming from other statistical programs, this might seem normal. But one of the key advantages to using R is to have a record of all the changes you've made to a dataset. You can take your raw data, re-run your R code, and you should get the exact same output as before. If you've made some changes that aren't documented, you run the risk of coming back six months later and not being able to reproduce the results you ran before. My recommendation is to *always* make changes to your data by running syntax code.
+
+One final tool for examining our data is the very useful `str()` (for "structure") function. Let's take a look at what this shows us for just a small portion of our data:
+
+```{r str}
+str(data[, 1:10])
+```
+
+Don't get too hung up on the syntax here -- we'll get to that in a later lesson. The point here is that the `str()` function lets us know a few things:
+
+1. It tells us that the object referred to by "data" has the type "data.frame";
+2. It shows us the number of rows and columns in the data frame (191 rows, and 10 columns here);
+3. It tells us the names of the columns in our dataset; and
+4. It tells us the type of each column (integer, character, etc.) and shows us a preview of the first few rows of data, similar to what `head()` gave us.
+
+In short, `str()` gives us a nice summary of our data in a fairly compact format. However, I should note a few other functions that give us some pieces of this information individually: `nrow()` and `ncol()` would tell us the number of rows and columns, respectively; `class()` will tell us the types of our objects, such as "data.frame", "integer", and "character"; and `names()` will give us the names of the columns in our data. Try these out for yourself and see what you find!
+
+### Cleaning data
+
+In this section, we are going to deal with very simple data cleaning techniques involving making sure our variables are in the correct format. The next lesson will cover how to move around and manipulate data further, so these techniques will also help with getting data cleaned and ready for analysis.
+
+To start, we need to learn how to refer to variables in our dataset. Because our data is in "data.frame" format, there is a special shortcut notation for referring to columns (variables), called the dollar sign notation. Try it as follows:
+
+```{r subset}
+data$id
+
+data$condition
+```
+
+As you can see, we just identify the name of the object we want to use ("data"), include a dollar sign, and then refer to the name of the column in our dataset. Here we referred to the first two columns.
+
+We saw above that the `str()` function lets us know what type each variable is in our dataset. We have a few variables that identify the date and time when each participant started and ended the study. Right now, that data is in character format (i.e., text), but we would like it to be identified as actual date and time information.
+
+R has a few formats for dealing with date and time information. For just calendar dates, R uses a Date format that stores dates internally as the number of days since January 1st, 1970. However, it makes it easy on us by showing us a more human-readable format as YYYY-MM-DD. To turn a string of text into a date, we can use the `as.Date()` function like so:
+
+```{r dates}
+my_date <- as.Date("2016-08-06")  # create a new Date object and assign it the name "my_date"
+my_date  # print the contents of "my_date" to the screen
+str(my_date)  # tell us the format of "my_date"
+```
+
+As you can see, it's taken a string of text (represented by the double quotes) and turned it into something that R recognizes as a date. This allows us to take advantage of functions that add or subtract dates, compare dates, etc.
+
+<aside>
+In the above code, you can see code comments. In R, comments are designated by a hash mark (#; or "hashtag" for the kids). Anything after the hash mark will be ignored by R. But they won't be ignored by people! Use comments often; it will greatly benefit your future self, when you go back in six months and wonder what you were trying to do. It will also benefit anyone else who reads your code, if you share it with others. Try to be explanatory with your comments -- talk about what the purpose of the code is, rather than just describing exactly what it does. But when you're starting out with programming, lots of comments are good :)
+</aside>
+
+When it comes to information involving time, R has two formats: POSIXct and POSIXlt. The POSIXct format stores the time as the number of seconds since January 1st, 1970, 12:00 UTC. The POSIXlt format stores the time as a list of information: seconds, minutes, hours, day, month, year, etc. You might ask why we need both formats. Part of the answer has to do with history: January 1st, 1970 is known as the "Unix Epoch", and is a widely-used standard in virtually all programming languages. R is just keeping up with that standard, and also making it possible for R to "talk to" other languages. The second part of the answer is that while POSIXlt is more human-readable, it can get tricky to compare times in this format because of timezone information, etc. Ultimately, though, in R you can convert from one format to the other, so which is best will depend on your particular usage.
+
+Since all our participants in this case were in the same timezone, let's work on converting the startDate and startTime, and the endDate and endTime, to the POSIXlt format. The first thing we need is to combine this information together (so we have text specifying both date and time, rather than in two separate variables). This is easily accomplished with the `paste()` function.
+
+```{r datetime}
+startDateTime <- paste(data$startDate, data$startTime)
+endDateTime <- paste(data$endDate, data$endTime)
+```
+
+What the `paste()` function does is takes our variables (startDate and startTime) and goes through each row, one at a time, and pastes them together. By default, it separates them with a space, which is fine for our purposes. We've done the same thing with the end dates and times.
+
+Now that we have this, we need to tell R to treat these as POSIXlt objects. But because dates and times can be represented in so many different formats, we have to tell R how to read these strings of text. To do this, we use the `strptime()` function.
+
+```{r strptime}
+data$startDateTime <- strptime(startDateTime, format="%d/%m/%Y %H:%M:%S")
+data$endDateTime <- strptime(endDateTime, format="%d/%m/%Y %H:%M:%S")
+```
+
+Let's break down what the code above does. First, we give the datetime information to `strptime()`. The second argument, "format", tells it exactly what format our datetimes are in. For more information about this, look at the help documentation by typing `?strptime`. The `strptime()` function then converts all our dates and times into the POSIXlt format. Finally, we assign that output to two new columns in our dataset, "startDateTime" and "endDateTime". Note that these columns didn't exist before -- assigning information to a column that doesn't yet exist in the data will simply create a new column.
+
+Great! If you view the new dates and times by typing in `data$startDateTime`, you can see that it even covers the change from EST to EDT automatically.
+
+The last thing that we will do in this lesson is to convert some of our other character variables to factors. Factors are a special type of data in R that are generally used for categorical variables. For example:
+
+```{r condition}
+data$condition
+```
+
+In our study, we had three conditions, and this was represented in our code by "a", "b", and "c". This is fine, but it's kind of a pain. First off, the letters aren't very intuitive -- we'd have to remember which letter corresponds to which condition. Second, converting this to a factor will allow us to take advantage of some really cool tools once we use this variable in our analyses. R will automatically set up dummy-coded variables for us, we can use various contrasts or easily change the reference condition, etc. Instead of manually setting up individual dummy-coded variables, we can get R to do all the work for us! So let's convert this now.
+
+```{r factor}
+data$condition <- factor(data$condition, labels=c("Promotion", "Assessment", "Control"))
+```
+
+Here we did a few things. First, we use the `factor()` function and provide it with the condition variable that we want to convert. Second, we can substitute some labels that are more intuitive. Remember that we had three conditions: a promotion focus condition, an assessment mode condition, and a control condition where participants didn't write anything. Keep in mind that these need to be in the order of the data: "Promotion" refers to "a", "Assessment" refers to "b", and "Control" refers to "c". R will store the information for the factor in numeric form, but will show it to us using these labels to make it easier. Finally, we assign the output of the function back into the same variable in this case, `data$condition`. That will overwrite our character information, but in this case that's okay. It's the exact same information anyway, just easier for us to work with.
+
+Now, when we look at the condition variable, it's much clearer:
+
+```{r condition2}
+data$condition
+
+levels(data$condition)
+```
+
+Note that we can also ask what the levels of the variable are, using the `levels()` function.
+
+That's it for now! We've learned how to view our data, how to refer to specific variables, how R represents dates and times, and how to do some basic cleaning tasks to get our data ready. In the next lesson, we'll talk more about how to subset our data in various ways, a very important aspect of working in R.
