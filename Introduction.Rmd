@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Learning R Tutorial
+# Learning R Tutorial: A Process-Focused Approach
 
 ## Introduction: The Middle Way
 
@@ -24,7 +24,7 @@ The first type of tutorial covers the basic "building blocks" of R, such as vari
 
 The latter type of tutorial tends to cover statistical tools (e.g., t-tests, regression, correlation) as a bunch of cut-and-paste codes; there is typically little explanation of how to flexibly translate that into something useful for your own research. For example, what happens when a particular functions wants a vector, but your data is in a list format? If you don't even understand what these structures are and how they work, you end up having to go back and learn all those basics anyway. This type of tutorial treats R like a statistical program (which it is) without really getting into any of the programming principles that make R useful and efficient.
 
-So if you haven't guessed, my approach to this tutorial is to try to provide a "Middle Way" that incorporates both these strategies. It is written with researchers in mind, but is designed to show you the basic programming tools along the way that will help you get the most out of R. Quite frankly, if you don't learn the programming principles of R, you might as well use a different statistical program. The fact that R is a full-fledged programming language is what makes using R so powerful. But what we will do in this tutorial is teach these programming principles "along the way" as we try to analyze a set of data. This way, we can see immediately why these basic building blocks are relevant! And hopefully we won't get bogged down in some of the arcane details of programming that aren't as relevant for researchers.
+So if you haven't guessed, my approach to this tutorial is to try to provide a "Middle Way" that incorporates both these strategies. It is written with researchers in mind, but is designed to show you the basic programming tools along the way that will help you get the most out of R. Quite frankly, if you don't learn the programming principles of R, you might as well use a different statistical program. The fact that R is a full-fledged programming language is what makes using R so powerful. But what we will do in this tutorial is teach these programming principles "along the way" as we try to analyze a set of data. By using this "process-focused" approach, we can see immediately why these basic building blocks are relevant! And hopefully we won't get bogged down in some of the arcane details of programming that aren't as relevant for researchers.
 
 ## Prerequisites
 

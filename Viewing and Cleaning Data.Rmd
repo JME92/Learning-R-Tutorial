@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 data <- read.csv("data/maximizing_data.csv", stringsAsFactors=FALSE)
 ```
 
-# Learning R Tutorial
+# Learning R Tutorial: A Process-Focused Approach
 
 ## Viewing and Cleaning Data
 
@@ -87,12 +87,12 @@ str(my_date)  # tell us the format of "my_date"
 As you can see, it's taken a string of text (represented by the double quotes) and turned it into something that R recognizes as a date. This allows us to take advantage of functions that add or subtract dates, compare dates, etc.
 
 <aside>
-In the above code, you can see code comments. In R, comments are designated by a hash mark (#; or "hashtag" for the kids). Anything after the hash mark will be ignored by R. But they won't be ignored by people! Use comments often; it will greatly benefit your future self, when you go back in six months and wonder what you were trying to do. It will also benefit anyone else who reads your code, if you share it with others. Try to be explanatory with your comments -- talk about what the purpose of the code is, rather than just describing exactly what it does. But when you're starting out with programming, lots of comments are good :)
+In the above code, you can see code comments. In R, comments are designated by a hash mark (#; or "hashtag" as the kids call 'em). Anything after the hash mark will be ignored by R. But they won't be ignored by people! Use comments often; it will greatly benefit your future self, when you go back in six months and wonder what you were trying to do. It will also benefit anyone else who reads your code, if you share it with others. Try to be explanatory with your comments -- talk about what the purpose of the code is, rather than just describing exactly what it does. But when you're starting out with programming, lots of comments are good :)
 </aside>
 
-When it comes to information involving time, R has two formats: POSIXct and POSIXlt. The POSIXct format stores the time as the number of seconds since January 1st, 1970, 12:00 UTC. The POSIXlt format stores the time as a list of information: seconds, minutes, hours, day, month, year, etc. You might ask why we need both formats. Part of the answer has to do with history: January 1st, 1970 is known as the "Unix Epoch", and is a widely-used standard in virtually all programming languages. R is just keeping up with that standard, and also making it possible for R to "talk to" other languages. The second part of the answer is that while POSIXlt is more human-readable, it can get tricky to compare times in this format because of timezone information, etc. Ultimately, though, in R you can convert from one format to the other, so which is best will depend on your particular usage.
+When it comes to information involving time, R has two formats: POSIXct and POSIXlt. The POSIXct format stores the time as the number of seconds since January 1st, 1970, 12:00 UTC. The POSIXlt format stores the time as a list of information: seconds, minutes, hours, day, month, year, etc. You might ask why we need both formats. Part of the answer has to do with history: January 1st, 1970 is known as the "Unix Epoch", and is a widely-used standard in virtually all programming languages. R is just keeping up with that standard, and also making it possible for R to "talk to" other languages. The second part of the answer is that while POSIXlt is more human-readable, it can get tricky to compare times in this format because of timezone information, etc. It also is less suitable to store in data frames. Ultimately, though, in R you can convert from one format to the other, so which is best will depend on your particular usage.
 
-Since all our participants in this case were in the same timezone, let's work on converting the startDate and startTime, and the endDate and endTime, to the POSIXlt format. The first thing we need is to combine this information together (so we have text specifying both date and time, rather than in two separate variables). This is easily accomplished with the `paste()` function.
+Since we want to store this data in our data frame, let's work on converting the startDate and startTime, and the endDate and endTime, to the POSIXct format. The first thing we need is to combine this information together (so we have text specifying both date and time, rather than in two separate variables). This is easily accomplished with the `paste()` function.
 
 ```{r datetime}
 startDateTime <- paste(data$startDate, data$startTime)
@@ -101,16 +101,28 @@ endDateTime <- paste(data$endDate, data$endTime)
 
 What the `paste()` function does is takes our variables (startDate and startTime) and goes through each row, one at a time, and pastes them together. By default, it separates them with a space, which is fine for our purposes. We've done the same thing with the end dates and times.
 
-Now that we have this, we need to tell R to treat these as POSIXlt objects. But because dates and times can be represented in so many different formats, we have to tell R how to read these strings of text. To do this, we use the `strptime()` function.
+Now that we have this, we need to tell R to treat these as POSIXct objects. But because dates and times can be represented in so many different formats, we have to tell R how to read these strings of text. To do this, we use the `strptime()` function.
 
 ```{r strptime}
-data$startDateTime <- strptime(startDateTime, format="%d/%m/%Y %H:%M:%S")
-data$endDateTime <- strptime(endDateTime, format="%d/%m/%Y %H:%M:%S")
+startDateTime.POSIXlt <- strptime(startDateTime, format="%d/%m/%Y %H:%M:%S")
+endDateTime.POSIXlt <- strptime(endDateTime, format="%d/%m/%Y %H:%M:%S")
+
+data$startDateTime <- as.POSIXct(startDateTime.POSIXlt)
+data$endDateTime <- as.POSIXct(endDateTime.POSIXlt)
 ```
 
-Let's break down what the code above does. First, we give the datetime information to `strptime()`. The second argument, "format", tells it exactly what format our datetimes are in. For more information about this, look at the help documentation by typing `?strptime`. The `strptime()` function then converts all our dates and times into the POSIXlt format. Finally, we assign that output to two new columns in our dataset, "startDateTime" and "endDateTime". Note that these columns didn't exist before -- assigning information to a column that doesn't yet exist in the data will simply create a new column.
+Let's break down what the code above does. First, we give the datetime information to `strptime()`. The second argument, "format", tells it exactly what format our datetimes are in. For more information about this, look at the help documentation by typing `?strptime`. The `strptime()` function then converts all our dates and times into the *POSIXlt* format. Finally, because we want our final data to be in *POSIXct* format, we use the `as.POSIXct()` function, which converts from one to the other, and assign that output to two new columns in our dataset, "startDateTime" and "endDateTime". Note that these columns didn't exist before -- assigning information to a column that doesn't yet exist in the data will simply create a new column.
 
 Great! If you view the new dates and times by typing in `data$startDateTime`, you can see that it even covers the change from EST to EDT automatically.
+
+Note that we could have done the exact same thing in the above code in one step instead of two:
+
+```{r strptime2, eval=FALSE}
+data$startDateTime <- as.POSIXct(strptime(startDateTime, format="%d/%m/%Y %H:%M:%S"))
+data$endDateTime <- as.POSIXct(strptime(endDateTime, format="%d/%m/%Y %H:%M:%S"))
+```
+
+Because we don't care about keeping the data in POSIXlt format, we don't really need those interim variables `startDateTime.POSIXlt` and `endDateTime.POSIXlt`. So we could just nest the functions inside each other and skip creating those two new variables. But sometimes it's easier to see what's going on when you separate out the interim steps.
 
 The last thing that we will do in this lesson is to convert some of our other character variables to factors. Factors are a special type of data in R that are generally used for categorical variables. For example:
 

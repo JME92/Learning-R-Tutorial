@@ -11,12 +11,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r start, include=FALSE}
 data <- read.csv("data/maximizing_data.csv", stringsAsFactors=FALSE)
-data$startDateTime <- strptime(paste(data$startDate, data$startTime), format="%d/%m/%Y %H:%M:%S")
-data$endDateTime <- strptime(paste(data$endDate, data$endTime), format="%d/%m/%Y %H:%M:%S")
+data$startDateTime <- as.POSIXct(strptime(paste(data$startDate, data$startTime), format="%d/%m/%Y %H:%M:%S"))
+data$endDateTime <- as.POSIXct(strptime(paste(data$endDate, data$endTime), format="%d/%m/%Y %H:%M:%S"))
 data$condition <- factor(data$condition, labels=c("Promotion", "Assessment", "Control"))
 ```
 
-# Learning R Tutorial
+# Learning R Tutorial: A Process-Focused Approach
 
 ## Working with Data
 
