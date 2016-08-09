@@ -59,3 +59,29 @@ So here's what we hypothesized:
 2. Chronic maximizing should also be associated with greater decision difficulty and regret (using the control condition only).
 
 We will also do some other exploratory analyses in this tutorial in order to gain experience with different statistical methods. We'll ask and answer these questions as we go along.
+
+### A Few Notes
+
+Before we dive right in, it's important to note a few things about what you'll see in the coming lessons. Often, I will present R code, which will appear like so:
+
+```{r sample.code}
+paste("This is some", "sample code.", "Isn't R fun?")
+```
+
+In the grey box above, you can see the code that you can type, or copy and paste, into R yourself. When you see the ">" symbol in R, that means R is ready for you to give it your next command. Try typing the above code into R and press Enter. What you should see is the output shown in the white box above.
+
+The hash marks on the left of the output in the white box above designate code comments. In R, comments are designated by a hash mark (#; or "hashtag" as the kids call 'em). Anything after the hash mark will be ignored by R. But they won't be ignored by people! Use comments often; it will greatly benefit your future self, when you go back in six months and wonder what you were trying to do. It will also benefit anyone else who reads your code, if you share it with others. I include hash marks at the start of my output here so that you can copy and paste that too if you want. That way, if you accidentally run that line, R will just ignore it anyway.
+
+As a general note, when writing comments, try to be explanatory with your comments -- talk about what the purpose of the code is, rather than just describing exactly what it does. But when you're starting out with programming, lots of comments, of any kind, are good :)
+
+If you are using RStudio, you can also open a new script file by clicking File > New File > R Script (or using the button in the toolbar). This will let you type all your code into a file that is easily saved and kept. R script files have the suffix ".R". I'd recommend putting the code you will learn about here into a script, so you can keep it and easily refer to it later. Once you have a script, you can run the entire thing all at once, or run selected lines, by clicking the "Run" button in the corner of the RStudio script pane (or using the drop-down button beside it). Or, you can also press Ctrl+Enter to run the selected line.
+
+#### Help!
+
+Finally, it is important before we begin to say a word about finding help in R. R is a powerful statistical tool, but sometimes it can be downright cryptic with its error messages. This means that knowing how to find help and documentation is important!
+
+To find documentation about a particular function, you can type a question mark before the function name, like so: `?mean`. If you are running basic R, this will pull up a browser window. If you are running RStudio, it will pop up the documentation in the bottom-right pane (by default) -- definitely handy! The documentation for R functions is typically pretty good, and will give you a short description of what the function does, show you the various values you can use, provide some details about any special calculations that are important to know, tell you the type of output the function will provide, provide links to similar functions, and typically provide some examples of how to use the function. All helpful stuff!
+
+There is also a wealth of information online about R functions, error codes, etc. Chances are, if you run into an error, typing the error into Google will provide you with some useful information about what's going on and what to try. There are some online communities that will also provide help, and you can ask questions: [Stack Overflow](http://stackoverflow.com) is a fantastic resource, and their answers will typically be at the top of Google search results as well. It's a great community that answers all sorts of programming questions, with the best answers getting voted to the top by others. The community on Reddit for [R stats](https://www.reddit.com/r/rstats) is also very helpful, and may sometimes be a little less intimidating for newcomers than Stack Overflow.
+
+But ultimately, one thing I would like to impress upon you is that in R, because of the way it is designed, it is very difficult to really, permanently screw up your data. Unlike many other statistical programs, R imports data to your current R session, and then won't touch the data file again until you tell it to save it back. This means you can import it, play around all you want with it, and if you mess everything up, just re-import it and start again! So my advice to you, as you start learning R, is to play around as much as possible! If you think of an approach that might work, try it and see how it goes! If it doesn't work, just take a step back and try again. Be bold and adventurous -- that is how you will get the most out of your R experience!

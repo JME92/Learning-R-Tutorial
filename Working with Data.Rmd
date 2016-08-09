@@ -164,9 +164,9 @@ Subsetting data frames is very similar to the notation for matrices:
 
 ```{r data.frames2}
 df[1, 3]
-df[2, 'y']
-df[2:3, 'z']
-df[-1, 'x']
+df[2, "y"]
+df[2:3, "z"]
+df[-1, "x"]
 ```
 
 As you can see, we use the row and column notation, and we can provide sequences of numbers, or negative numbers, just like with subsetting vectors. An added feature, however, is that because we have named columns, we can also refer to the *names* of the columns by providing a character vector with the name(s). (Note that this is also available for matrices, if you specifically name the columns. You can also name rows, if you so desire, and refer to them with character vectors.)
@@ -195,9 +195,11 @@ As you can see, we give the function a character vector with the name(s) of the 
 
 After you have installed a package, you need to *load* it onto your current R session. **To use a package, you need to load it every session you wish to use it.** The reason for this is simple: With thousands of packages, the chance of having two packages with the same function names increases. If R just loaded every package you have ever installed, it would get very difficult to avoid conflicts like this. So R only loads the basic functionality to start off, and then you can tell it which packages you want to use this time. Here's how you load a package into an R session:
 
-```{r load.packages, eval=FALSE}
+```{r load.packages}
 library(dplyr)
 ```
+
+(As you can see from the output above, loading the package already has created some "conflicts" with other packages. In the case of dplyr, this is intentional, as it is specifically designed to overrule some of the other basic functions in R. But in general, it's important to note when these conflicts occur. If you really need a specific function from *this* package rather than *that* package, you can use the double colon notation to specify which one you want. For the above case, if I really wanted the "filter" function from the stats package, I would use `stats::filter()`.)
 
 Often, when researchers write their code to analyze a set of data, they'll put the packages they need to load right at the top. That just makes it easy for them and others to know what packages are needed, and to load them right away.
 
@@ -212,7 +214,7 @@ The dplyr package includes a number of really useful tools for working with data
 
 Let's take these in order. The dplyr package has intuitive functions with reasonable intuitive names. To filter certain rows, use the `filter()` function. To select certain columns, use the `select()` function. You can use `arrange()` to sort rows, `mutate()` to calculate new variables in your dataset, and `summarise()` to create summaries of your data. Let's just look at a couple of the basic ones:
 
-```{r dplyr, results="hide"}
+```{r dplyr, eval=FALSE}
 filter(data, frustration > 4)
 select(data, difficulty)
 select(data, MTS_1:MTS_9)
@@ -220,19 +222,20 @@ select(data, MTS_1:MTS_9)
 
 The first function, `filter()`, lets us select rows according to a given set of criteria. In this case, we just wanted to see participants who rated their frustration with the decision task as greater than 4. The second function, `select()` lets us grab particular columns. We can select an individual column, as in the first example with just "difficulty", or we can select a sequence of columns, like the variables "MTS_1" through to "MTS_9". This, to me, is a really nice feature, as in the regular R square bracket notation, you cannot provide sequences of variable names. We could do the same thing as above with square brackets as follows:
 
-```{r dplyr2, results="hide"}
-data[data$frustration > 4, ]
+```{r dplyr2, eval=FALSE}
+data[data$frustration > 4, ]  # equivalent to: filter(data, frustration > 4)
 
-data[, "difficulty"]
+data[, "difficulty"]  # equivalent to: select(data, difficulty)
 
 data[, 48:56]
 # OR
 data[, c("MTS_1", "MTS_2", "MTS_3", "MTS_4", "MTS_5", "MTS_6", "MTS_7", "MTS_8", "MTS_9")]
+# both equivalent to: select(data, MTS_1:MTS_9)
 ```
 
 Note that in the first two examples, we can do the same thing relatively easily (though I think the dplyr syntax looks a little more intuitive). However, in the last example, it's a real pain to have to list out each of the variables one by one. We could alternately select it by referring to the column numbers, but this is not very clear. When you come back to this in six months, are you going to remember which column is column 48? And what happens if you move the columns around?
 
-The second thing that dplyr does nicely, though, is supports the "piping" feature. This is something that makes complex manipulations of data look very intuitive and clear. Consider the following example: I want to filter only participants with frustration greater than 4. Then I want to select the "difficulty" column. And then I want to summarise the information to get the mean difficulty. Here's one way we could do it:
+The second thing that dplyr does nicely, though, is supports the "piping" feature. This is something that makes complex manipulations of data look very intuitive and clear. Consider the following example: I want to filter only participants with frustration greater than 4. Then I want to select the "difficulty" column. And then I want to summarise the information to get the mean difficulty (for that subset of data). Here's one way we could do it:
 
 ```{r dplyr3}
 summarise(select(filter(data, frustration > 4), difficulty), result=mean(difficulty, na.rm=TRUE))

@@ -79,16 +79,12 @@ We saw above that the `str()` function lets us know what type each variable is i
 R has a few formats for dealing with date and time information. For just calendar dates, R uses a Date format that stores dates internally as the number of days since January 1st, 1970. However, it makes it easy on us by showing us a more human-readable format as YYYY-MM-DD. To turn a string of text into a date, we can use the `as.Date()` function like so:
 
 ```{r dates}
-my_date <- as.Date("2016-08-06")  # create a new Date object and assign it the name "my_date"
-my_date  # print the contents of "my_date" to the screen
-str(my_date)  # tell us the format of "my_date"
+my_date <- as.Date("2016-08-06")
+my_date
+str(my_date)
 ```
 
 As you can see, it's taken a string of text (represented by the double quotes) and turned it into something that R recognizes as a date. This allows us to take advantage of functions that add or subtract dates, compare dates, etc.
-
-<aside>
-In the above code, you can see code comments. In R, comments are designated by a hash mark (#; or "hashtag" as the kids call 'em). Anything after the hash mark will be ignored by R. But they won't be ignored by people! Use comments often; it will greatly benefit your future self, when you go back in six months and wonder what you were trying to do. It will also benefit anyone else who reads your code, if you share it with others. Try to be explanatory with your comments -- talk about what the purpose of the code is, rather than just describing exactly what it does. But when you're starting out with programming, lots of comments are good :)
-</aside>
 
 When it comes to information involving time, R has two formats: POSIXct and POSIXlt. The POSIXct format stores the time as the number of seconds since January 1st, 1970, 12:00 UTC. The POSIXlt format stores the time as a list of information: seconds, minutes, hours, day, month, year, etc. You might ask why we need both formats. Part of the answer has to do with history: January 1st, 1970 is known as the "Unix Epoch", and is a widely-used standard in virtually all programming languages. R is just keeping up with that standard, and also making it possible for R to "talk to" other languages. The second part of the answer is that while POSIXlt is more human-readable, it can get tricky to compare times in this format because of timezone information, etc. It also is less suitable to store in data frames. Ultimately, though, in R you can convert from one format to the other, so which is best will depend on your particular usage.
 

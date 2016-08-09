@@ -47,7 +47,7 @@ R has a particular way of looking for files: It always looks to files relative t
 
 To find out where your R working directory is set to at the moment, type the following into R:
 
-```{r getwd, results="hide"}
+```{r getwd, eval=FALSE}
 getwd()
 ```
 
@@ -55,7 +55,7 @@ That stands for "get working directory". You'll notice it is another R function,
 
 If you're just using R for the first time, chances are that it's not in a very useful place. So now we should know how to change the working directory:
 
-```{r setwd, results="hide"}
+```{r setwd, eval=FALSE}
 setwd("C:/jeff/Documents/Research")
 ```
 
