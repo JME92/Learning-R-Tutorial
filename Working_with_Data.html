@@ -287,15 +287,16 @@ df</code></pre>
 select(data, difficulty)
 select(data, MTS_1:MTS_9)</code></pre>
 <p>The first function, <code>filter()</code>, lets us select rows according to a given set of criteria. In this case, we just wanted to see participants who rated their frustration with the decision task as greater than 4. The second function, <code>select()</code> lets us grab particular columns. We can select an individual column, as in the first example with just “difficulty”, or we can select a sequence of columns, like the variables “MTS_1” through to “MTS_9”. This, to me, is a really nice feature, as in the regular R square bracket notation, you cannot provide sequences of variable names. We could do the same thing as above with square brackets as follows:</p>
-<pre class="r"><code>data[data$frustration &gt; 4, ]
+<pre class="r"><code>data[data$frustration &gt; 4, ]  # equivalent to: filter(data, frustration &gt; 4)
 
-data[, &quot;difficulty&quot;]
+data[, &quot;difficulty&quot;]  # equivalent to: select(data, difficulty)
 
 data[, 48:56]
 # OR
-data[, c(&quot;MTS_1&quot;, &quot;MTS_2&quot;, &quot;MTS_3&quot;, &quot;MTS_4&quot;, &quot;MTS_5&quot;, &quot;MTS_6&quot;, &quot;MTS_7&quot;, &quot;MTS_8&quot;, &quot;MTS_9&quot;)]</code></pre>
+data[, c(&quot;MTS_1&quot;, &quot;MTS_2&quot;, &quot;MTS_3&quot;, &quot;MTS_4&quot;, &quot;MTS_5&quot;, &quot;MTS_6&quot;, &quot;MTS_7&quot;, &quot;MTS_8&quot;, &quot;MTS_9&quot;)]
+# both equivalent to: select(data, MTS_1:MTS_9)</code></pre>
 <p>Note that in the first two examples, we can do the same thing relatively easily (though I think the dplyr syntax looks a little more intuitive). However, in the last example, it’s a real pain to have to list out each of the variables one by one. We could alternately select it by referring to the column numbers, but this is not very clear. When you come back to this in six months, are you going to remember which column is column 48? And what happens if you move the columns around?</p>
-<p>The second thing that dplyr does nicely, though, is supports the “piping” feature. This is something that makes complex manipulations of data look very intuitive and clear. Consider the following example: I want to filter only participants with frustration greater than 4. Then I want to select the “difficulty” column. And then I want to summarise the information to get the mean difficulty. Here’s one way we could do it:</p>
+<p>The second thing that dplyr does nicely, though, is supports the “piping” feature. This is something that makes complex manipulations of data look very intuitive and clear. Consider the following example: I want to filter only participants with frustration greater than 4. Then I want to select the “difficulty” column. And then I want to summarise the information to get the mean difficulty (for that subset of data). Here’s one way we could do it:</p>
 <pre class="r"><code>summarise(select(filter(data, frustration &gt; 4), difficulty), result=mean(difficulty, na.rm=TRUE))</code></pre>
 <pre><code>##     result
 ## 1 5.236842</code></pre>

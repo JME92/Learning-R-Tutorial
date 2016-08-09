@@ -1,15 +1,8 @@
----
-title: "Introduction"
-author: "Jeff Hughes"
-date: "August 5, 2016"
-output: 
-  html_document: 
-    keep_md: yes
----
+# Introduction
+Jeff Hughes  
+August 5, 2016  
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 # Learning R Tutorial: A Process-Focused Approach
 
@@ -66,8 +59,13 @@ We will also do some other exploratory analyses in this tutorial in order to gai
 
 Before we dive right in, it's important to note a few things about what you'll see in the coming lessons. Often, I will present R code, which will appear like so:
 
-```{r sample.code}
+
+```r
 paste("This is some", "sample code.", "Isn't R fun?")
+```
+
+```
+## [1] "This is some sample code. Isn't R fun?"
 ```
 
 In the grey box above, you can see the code that you can type, or copy and paste, into R yourself. When you see the ">" symbol in R, that means R is ready for you to give it your next command. Try typing the above code into R and press Enter. What you should see is the output shown in the white box above.

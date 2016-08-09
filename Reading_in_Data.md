@@ -1,15 +1,8 @@
----
-title: "Reading in Data"
-author: "Jeff Hughes"
-date: "August 5, 2016"
-output: 
-  html_document: 
-    keep_md: yes
----
+# Reading in Data
+Jeff Hughes  
+August 5, 2016  
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 # Learning R Tutorial: A Process-Focused Approach
 
@@ -27,8 +20,13 @@ Functions are a critical part of any programming language. Functions allow us to
 
 As an example, consider the `mean()` function, which (as you might guess) calculates the mean of a set of numbers. We can use this function as follows:
 
-```{r mean}
+
+```r
 mean(c(1, 5, 9))
+```
+
+```
+## [1] 5
 ```
 
 To run this code yourself, you would go to the prompt in R (denoted by the ">" character in front of your cursor), type this code in, and then press Enter.
@@ -49,7 +47,8 @@ R has a particular way of looking for files: It always looks to files relative t
 
 To find out where your R working directory is set to at the moment, type the following into R:
 
-```{r getwd, eval=FALSE}
+
+```r
 getwd()
 ```
 
@@ -57,7 +56,8 @@ That stands for "get working directory". You'll notice it is another R function,
 
 If you're just using R for the first time, chances are that it's not in a very useful place. So now we should know how to change the working directory:
 
-```{r setwd, eval=FALSE}
+
+```r
 setwd("C:/jeff/Documents/Research")
 ```
 
@@ -69,7 +69,8 @@ Note that if you are using RStudio, you can also set your working directory by g
 
 Now that we've figured out how to use functions in R, and we've figured out where R is going to look for files, we can import our data. To do this, we're going to use the `read.csv()` function. Before we begin, make sure you have downloaded the data file from the previous lesson. I've saved mine into a subfolder in my "Research" folder called "data". This way, I can show you how R looks for files *relative* to the working directory. But if you save the data into your working directory, that's fine too -- just change the code below accordingly.
 
-```{r readcsv}
+
+```r
 data <- read.csv("data/maximizing_data.csv", stringsAsFactors=FALSE)
 ```
 
@@ -92,7 +93,8 @@ The final thing you might notice about the code above is that bit at the beginni
 
 The fact that it's called a variable might be a little confusing. Why is our entire dataset a variable? But in programming terms, it's a variable because it's an arbitrary name that could take on any value. We could later read in a second dataset and decide to assign the name "data" to that instead. Or we could do this:
 
-```{r variables}
+
+```r
 x <- 2
 x <- 5
 x <- TRUE

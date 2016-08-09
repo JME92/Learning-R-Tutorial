@@ -1,22 +1,10 @@
----
-title: "Working with Data"
-author: "Jeff Hughes"
-date: "August 7, 2016"
-output: 
-  html_document: 
-    keep_md: yes
----
+# Working with Data
+Jeff Hughes  
+August 7, 2016  
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
-```{r start, include=FALSE}
-data <- read.csv("data/maximizing_data.csv", stringsAsFactors=FALSE)
-data$startDateTime <- as.POSIXct(strptime(paste(data$startDate, data$startTime), format="%d/%m/%Y %H:%M:%S"))
-data$endDateTime <- as.POSIXct(strptime(paste(data$endDate, data$endTime), format="%d/%m/%Y %H:%M:%S"))
-data$condition <- factor(data$condition, labels=c("Promotion", "Assessment", "Control"))
-```
+
+
 
 # Learning R Tutorial: A Process-Focused Approach
 
@@ -32,7 +20,8 @@ The fundamental building block of R is the *vector*. Almost every type of data y
 
 We've actually been working with vectors already. In R, even a plain old number is actually a vector of length one. So when we typed in `x <- 2`, we actually assigned to "x" a vector of length one, for which the first (and only) value in the vector was 2. We've also been briefly acquainted with the primary way of creating vectors: the `c()` function (which stands for "combine"). This function takes any number of arguments, and combines them to create a longer vector. Consider the following code:
 
-```{r vector}
+
+```r
 y <- c(5, 3, 9, 4, 12)
 ```
 
@@ -48,8 +37,13 @@ Vectors don't have to be numeric, either. There are several basic "modes" (or ty
 
 Vectors can be created with any of these modes; the only note to be careful about is that the data within a vector must all be of the same mode. For instance, look at what happens when we combine multiple mode:
 
-```{r vector.mode}
+
+```r
 c(5, "c", TRUE)
+```
+
+```
+## [1] "5"    "c"    "TRUE"
 ```
 
 In the output, you can see that there are quotation marks around all three values. That's because R, behind the scenes, coerced them all to be the same mode. They all became character strings, so the resulting vector is of mode character. The basic order of what trumps what is: character > complex > numeric > integer > logical. Remembering this order is not critical, though; what is important to remember is that if you combine different vector modes, you might not get the output you expect.
@@ -62,28 +56,80 @@ As mentioned above, vectors are the fundamental building blocks of data in R. Yo
 
 One particularly useful type of vector is the sequence. This, fundamentally, is just a numeric vector, but you will frequently find yourself using sequences. Because they are so common, they have a shorthand notation, using the colon:
 
-```{r sequences}
+
+```r
 1:10
+```
+
+```
+##  [1]  1  2  3  4  5  6  7  8  9 10
+```
+
+```r
 5:1
+```
+
+```
+## [1] 5 4 3 2 1
+```
+
+```r
 -3:7
+```
+
+```
+##  [1] -3 -2 -1  0  1  2  3  4  5  6  7
 ```
 
 As you can see, the colon notation functions basically as the "to" word: "Give me a sequence from 1 to 10." If you need more complicated sequences of numbers, the `seq()` function will be useful. It has arguments to specify the "steps" (i.e., do you count by 1's, or by 0.1's, or by 5's?), or you can specify how many numbers you want it to output, and it will figure out what step pattern to use. Here are a few examples:
 
-```{r sequences2}
+
+```r
 seq(1, 5, by=.2)
+```
+
+```
+##  [1] 1.0 1.2 1.4 1.6 1.8 2.0 2.2 2.4 2.6 2.8 3.0 3.2 3.4 3.6 3.8 4.0 4.2
+## [18] 4.4 4.6 4.8 5.0
+```
+
+```r
 seq(1, 10, length.out=6)
+```
+
+```
+## [1]  1.0  2.8  4.6  6.4  8.2 10.0
 ```
 
 #### Factors
 
 We already encountered factors in our previous lesson, so I won't dwell on them here. However, it is useful to note that a factor is just a vector with an extra piece built on top of it. A vector is a group of numbers or characters, etc. A factor is a group of numbers or characters, but also specifies the levels associated with that group, like we saw with our "condition" variable. In that case, we had three levels. Here's an example that should make it clear:
 
-```{r factors}
+
+```r
 fctr <- factor(c(1, 3, 2, 4, 1, 1, 2, 4, 3, 2, 4))
 fctr
+```
+
+```
+##  [1] 1 3 2 4 1 1 2 4 3 2 4
+## Levels: 1 2 3 4
+```
+
+```r
 levels(fctr)
+```
+
+```
+## [1] "1" "2" "3" "4"
+```
+
+```r
 as.numeric(fctr)
+```
+
+```
+##  [1] 1 3 2 4 1 1 2 4 3 2 4
 ```
 
 We give the `factor()` function a vector of numbers; it then took that vector, counted up all the unique levels that vector had. The resulting factor variable is a combination of a numeric vector along with information about those levels. But if we wanted to get back to the original numeric vector, we can easily use the `as.numeric()` function to get just the values.
@@ -92,31 +138,72 @@ We give the `factor()` function a vector of numbers; it then took that vector, c
 
 Because a vector is a group of values, it is often useful to be able to refer to one of those values in particular. This is done using square bracket notation. We select the *index* of the value we wish to refer to, and R will give us just that value. (Note that unlike many programming languages that start their indices at 0, R starts its indices at 1.)
 
-```{r ref.vectors}
+
+```r
 vctr <- c(1, 5, 9, 3, 6)
 vctr[3]
+```
+
+```
+## [1] 9
+```
+
+```r
 vctr[1]
+```
+
+```
+## [1] 1
 ```
 
 We can also use this notation to assign new values to our vector. For example:
 
-```{r ref.vectors2}
+
+```r
 vctr[4] <- 7
 vctr
 ```
 
+```
+## [1] 1 5 9 7 6
+```
+
 What is important to realize is that the square bracket notation is actually giving us a *subset* of our vector. Equally important: If you recall, even individual numbers are actually vectors of length 1. So what we are doing here is giving R a *vector* representing the index of the value we want. This is important, because it means we are not actually limited to providing an index vector of length 1. For example:
 
-```{r ref.vectors3}
+
+```r
 vctr[1:3]
+```
+
+```
+## [1] 1 5 9
+```
+
+```r
 vctr[c(2, 4)]
+```
+
+```
+## [1] 5 7
 ```
 
 In the above examples, we are giving a vector of numbers which represent the indices we wish to subset. R also will interpret negative values:
 
-```{r ref.vectors4}
+
+```r
 vctr[-3]
+```
+
+```
+## [1] 1 5 7 6
+```
+
+```r
 vctr[c(-1, -4)]
+```
+
+```
+## [1] 5 9 6
 ```
 
 Here, the negative values refer to indices we *don't* want in our result. R will thus give us all the values except those ones.
@@ -127,9 +214,18 @@ Now we move onto some of the more complex forms of data in R. However, the princ
 
 Matrices are, fundamentally, just vectors with two dimensions instead of one. Take a look:
 
-```{r matrices}
+
+```r
 mtrx <- matrix(1:20, nrow=4, ncol=5)
 mtrx
+```
+
+```
+##      [,1] [,2] [,3] [,4] [,5]
+## [1,]    1    5    9   13   17
+## [2,]    2    6   10   14   18
+## [3,]    3    7   11   15   19
+## [4,]    4    8   12   16   20
 ```
 
 We gave the `matrix()` function a sequence from 1 to 20 (i.e., a numeric vector), and then told it to create 4 rows and 5 columns. And voila! We have a matrix.
@@ -138,11 +234,39 @@ I suspect that for many researchers, matrices are not a regular part of their da
 
 For our purposes here, I just want to mention the subsetting notation for matrices. It is a very intuitive step up from the notation for vectors. Vectors have one dimension, so we had a single index value; matrices have two dimensions, so we specify rows and columns:
 
-```{r matrices2}
+
+```r
 mtrx[3, 5]
+```
+
+```
+## [1] 19
+```
+
+```r
 mtrx[1:2, 3:4]
+```
+
+```
+##      [,1] [,2]
+## [1,]    9   13
+## [2,]   10   14
+```
+
+```r
 mtrx[1, ]
+```
+
+```
+## [1]  1  5  9 13 17
+```
+
+```r
 mtrx[, 3]
+```
+
+```
+## [1]  9 10 11 12
 ```
 
 The index before the comma represents the rows of the matrix; the index after the comma represents the columns. Note that you can specify either one or both, but *the comma is always required*. If one index is not specified, R will give you everything for that dimension (i.e., the whole row, or the whole column). Note also that R will "downgrade" the dimensions where possible: for `mtrx[, 3]`, we are asking for everything in the third column, but since that can be simplified into a vector, R does that for us. The result has only one dimension.
@@ -155,28 +279,68 @@ It may help to understand how R stores the data in a data frame. Under the surfa
 
 Many times, you will create a data frame in the process of importing data. However, to create a data frame from scratch, you can use the `data.frame()` function like so:
 
-```{r data.frames}
+
+```r
 df <- data.frame(x=c(1, 2, 3), y=c("a", "b", "c"), z=c(25, 78, 42))
 df
+```
+
+```
+##   x y  z
+## 1 1 a 25
+## 2 2 b 78
+## 3 3 c 42
 ```
 
 As you can see, we can name our columns ("x", "y", and "z" in this case), and provide individual vectors for each column. The only constraint for a data frame is that all the vectors must have the same length (i.e., same number of rows). If you find yourself with a different number of rows in one column, consider filling the extra spots with "NA" (i.e., missing values).
 
 Subsetting data frames is very similar to the notation for matrices:
 
-```{r data.frames2}
+
+```r
 df[1, 3]
+```
+
+```
+## [1] 25
+```
+
+```r
 df[2, "y"]
+```
+
+```
+## [1] b
+## Levels: a b c
+```
+
+```r
 df[2:3, "z"]
+```
+
+```
+## [1] 78 42
+```
+
+```r
 df[-1, "x"]
+```
+
+```
+## [1] 2 3
 ```
 
 As you can see, we use the row and column notation, and we can provide sequences of numbers, or negative numbers, just like with subsetting vectors. An added feature, however, is that because we have named columns, we can also refer to the *names* of the columns by providing a character vector with the name(s). (Note that this is also available for matrices, if you specifically name the columns. You can also name rows, if you so desire, and refer to them with character vectors.)
 
 One particular notation unique to data frames, however, is the shorthand dollar sign notation that we saw in a previous lesson. This only works if you have named columns, but you can then refer to the column like so:
 
-```{r data.frames3}
+
+```r
 df$z
+```
+
+```
+## [1] 25 78 42
 ```
 
 This can save some typing when you are working with columns a lot, which most researchers are.
@@ -189,7 +353,8 @@ Let's take a brief detour to talk about packages. R has some basic functions ava
 
 To install a package, use the helpfully-named function called `install.packages()`. Let's test it out by installing the "dplyr" package.
 
-```{r install.packages, eval=FALSE}
+
+```r
 install.packages("dplyr")
 ```
 
@@ -197,8 +362,22 @@ As you can see, we give the function a character vector with the name(s) of the 
 
 After you have installed a package, you need to *load* it onto your current R session. **To use a package, you need to load it every session you wish to use it.** The reason for this is simple: With thousands of packages, the chance of having two packages with the same function names increases. If R just loaded every package you have ever installed, it would get very difficult to avoid conflicts like this. So R only loads the basic functionality to start off, and then you can tell it which packages you want to use this time. Here's how you load a package into an R session:
 
-```{r load.packages}
+
+```r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
 ```
 
 (As you can see from the output above, loading the package already has created some "conflicts" with other packages. In the case of dplyr, this is intentional, as it is specifically designed to overrule some of the other basic functions in R. But in general, it's important to note when these conflicts occur. If you really need a specific function from *this* package rather than *that* package, you can use the double colon notation to specify which one you want. For the above case, if I really wanted the "filter" function from the stats package, I would use `stats::filter()`.)
@@ -216,7 +395,8 @@ The dplyr package includes a number of really useful tools for working with data
 
 Let's take these in order. The dplyr package has intuitive functions with reasonable intuitive names. To filter certain rows, use the `filter()` function. To select certain columns, use the `select()` function. You can use `arrange()` to sort rows, `mutate()` to calculate new variables in your dataset, and `summarise()` to create summaries of your data. Let's just look at a couple of the basic ones:
 
-```{r dplyr, eval=FALSE}
+
+```r
 filter(data, frustration > 4)
 select(data, difficulty)
 select(data, MTS_1:MTS_9)
@@ -224,7 +404,8 @@ select(data, MTS_1:MTS_9)
 
 The first function, `filter()`, lets us select rows according to a given set of criteria. In this case, we just wanted to see participants who rated their frustration with the decision task as greater than 4. The second function, `select()` lets us grab particular columns. We can select an individual column, as in the first example with just "difficulty", or we can select a sequence of columns, like the variables "MTS_1" through to "MTS_9". This, to me, is a really nice feature, as in the regular R square bracket notation, you cannot provide sequences of variable names. We could do the same thing as above with square brackets as follows:
 
-```{r dplyr2, eval=FALSE}
+
+```r
 data[data$frustration > 4, ]  # equivalent to: filter(data, frustration > 4)
 
 data[, "difficulty"]  # equivalent to: select(data, difficulty)
@@ -239,17 +420,29 @@ Note that in the first two examples, we can do the same thing relatively easily 
 
 The second thing that dplyr does nicely, though, is supports the "piping" feature. This is something that makes complex manipulations of data look very intuitive and clear. Consider the following example: I want to filter only participants with frustration greater than 4. Then I want to select the "difficulty" column. And then I want to summarise the information to get the mean difficulty (for that subset of data). Here's one way we could do it:
 
-```{r dplyr3}
+
+```r
 summarise(select(filter(data, frustration > 4), difficulty), result=mean(difficulty, na.rm=TRUE))
+```
+
+```
+##     result
+## 1 5.236842
 ```
 
 This works successfully. However, it is difficult to read. There are functions nested inside other functions, so to see what is happening, you need to read from "inside out". Instead, we can use the piping function (`%>%`), which lets us set up the same code, but read it from left to right. The piping function says, "Take the data that we had on the left side, and pipe it over to the function to the right". It passes the data along as the first argument of the function to the right. It's harder to explain, easier to see in action:
 
-```{r dplyr4}
+
+```r
 data %>%
     filter(frustration > 4) %>%
     select(difficulty) %>%
     summarise(result=mean(difficulty, na.rm=TRUE))
+```
+
+```
+##     result
+## 1 5.236842
 ```
 
 This does the exact same thing as above. But it makes it much more readable. The first line says, "Take our dataset and pass it along". The second line says, "Filter only participants with frustration greater than 4, then pass that filtered dataset along". The third line says, "Select the difficulty variable, and pass that dataset (i.e., the one variable) along". And the fourth line says, "Take that dataset, calculate the mean, and call it 'result'". Instead of having to read from inside to outside, we can read from left to right. The data gets passed along, being modified in each step.
