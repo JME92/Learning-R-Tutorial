@@ -1,0 +1,365 @@
+---
+title: "Inferential Statistics Part 1"
+author: "Jeff Hughes"
+date: "August 10, 2016"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r start, include=FALSE}
+library(dplyr)
+data <- read.csv("data/maximizing_data.csv", stringsAsFactors=FALSE)
+data$startDateTime <- as.POSIXct(strptime(paste(data$startDate, data$startTime), format="%d/%m/%Y %H:%M:%S"))
+data$endDateTime <- as.POSIXct(strptime(paste(data$endDate, data$endTime), format="%d/%m/%Y %H:%M:%S"))
+data$condition <- factor(data$condition, labels=c("Promotion", "Assessment", "Control"))
+
+data$RFQ_1.R <- 6 - data$RFQ_1
+data$RFQ_2.R <- 6 - data$RFQ_2
+data$RFQ_4.R <- 6 - data$RFQ_4
+data$RFQ_6.R <- 6 - data$RFQ_6
+data$RFQ_8.R <- 6 - data$RFQ_8
+data$RFQ_9.R <- 6 - data$RFQ_9
+data$RFQ_11.R <- 6 - data$RFQ_11
+data$RM_2.R <- 7 - data$RM_2
+data$RM_10.R <- 7 - data$RM_10
+data$RM_13.R <- 7 - data$RM_13
+data$RM_24.R <- 7 - data$RM_24
+data$RM_27.R <- 7 - data$RM_27
+data$MI_22.R <- 7 - data$MI_22
+data$regret6.R <- 8 - data$regret6
+
+data$Promotion <- rowMeans(select(data, RFQ_1.R, RFQ_3, RFQ_7, RFQ_9.R, RFQ_10, RFQ_11.R), na.rm=TRUE)
+data$Assessment <- rowMeans(select(data, RM_2.R, RM_6, RM_7, RM_9, RM_10.R, RM_11, RM_15, RM_19, RM_20, RM_22, RM_27.R, RM_30), na.rm=TRUE)
+data$HighStandards <- rowMeans(select(data, MTS_1:MTS_9), na.rm=TRUE)
+data$AlternativeSearch <- rowMeans(select(data, MI_23:MI_34), na.rm=TRUE)
+data$DecisionDifficulty <- rowMeans(select(data, MI_11:MI_21, MI_22.R), na.rm=TRUE)
+data$TaskDifficulty <- rowMeans(select(data, difficulty, frustration, struggle), na.rm=TRUE)
+data$Reconsideration <- rowMeans(select(data, reconsider1:reconsider4), na.rm=TRUE)
+data$Regret <- rowMeans(select(data, regret1:regret5, regret6.R), na.rm=TRUE)
+data$Conviction <- rowMeans(select(data, conviction1:conviction5), na.rm=TRUE)
+```
+
+# Learning R Tutorial: A Process-Focused Approach
+
+## Inferential Statistics, Part 1: t-tests, ANOVA, and Chi-Squared
+
+We are coming to the good stuff now -- the stuff researchers run their studies for in the first place! We typically don't just want to know means and standard deviations...we want p-values! We yearn for significance -- for both our results and our careers. And so, we use inferential statistics.
+
+I'm splitting this lesson into two parts, and in this first part we will cover some common statistics that involve at least one categorical variable: t-tests, ANOVAs, and chi-squared tests. In the next lesson, we'll cover tests that (often) involve continuous variables: correlation, regression, and a brief coverage of multi-level models.
+
+### t-tests
+
+Let's start off with the noble t-test. Within its noble lineage, the t-test has many relatives: tests for one sample, for two samples, for paired samples, etc. So let's cover each of these in turn.
+
+The one-sample t-test is the most reasonable place to start. Here we are comparing our sample mean to some static value -- typically a population mean. The function for this, as you could probably guess, is `t.test()`. In fact, this function covers all our forms of t-tests. To try it out, let's say that I wanted to determine whether the mean of our participants' reports of regret was statistically different from the midpoint of the scale (4, given that the scale was from 1 to 7). Here's how we could do that
+
+```{r one.sample.t}
+t.test(data$Regret, mu=4)
+```
+
+At the top, we see our t-value, the degrees of freedom for the test, and our p-value. (One thing to get used to in R is that it likes using scientific notation for very small or very large values. "1.08e-10" is the same as saying 1.08 * 10<sup>-10</sup>. In other words. Really, really small. If you absolutely hate the scientific notation, you can turn it off by running `options(scipen=999)`. If you want to switch it back on, use `options(scipen=0)`.)
+
+Below that, we're also given a 95% confidence interval, and also helpfully given the actual mean of our variable. This lines up with what we would find if we calculated the mean ourselves:
+
+```{r mean}
+mean(data$Regret, na.rm=TRUE)
+```
+
+And of course, when I say "calculate the mean ourselves", I just mean "use a function to do it". What are we, savages?
+
+Independent two-sample t-tests are just as easy to calculate. Instead of giving the `t.test()` function one variable, we give it two. One variable holds the values from our first group; the second variable holds the values from our second group. We have a variable in our dataset identifying participants' gender. Let's take a look at whether our regret variable differs between men and women.
+
+(More cautious researchers may reject the idea of gender as a binary. That is an excellent point; however, it doesn't really help us to learn the t-test, so for now we'll just make the simplifying assumption of gender as a binary. Please direct your angry letters to [William Sealy Gosset](https://en.wikipedia.org/wiki/William_Sealy_Gosset), the guy who invented a test that only works with two groups.)
+
+First, let's split up our data, using the `filter()` function from the dplyr package:
+
+```{r split}
+data_men <- filter(data, gender == "Man")
+data_women <- filter(data, gender == "Woman")
+```
+
+All we've done here is grab two subsets of our data and store them with a new name. Then , we can then give the `t.test()` function the regret variable found in each of the subsets:
+
+```{r indep.t}
+t.test(data_men$Regret, data_women$Regret)
+```
+
+As we can see, it appears that the men in our sample (x, the first input to the function) showed significantly less regret than the women in our sample (y, the second input to the function).
+
+If you'll note at the top of the output, it specifies that it ran a "Welch Two Sample t-test". This is a test that does not make the assumption that the variances between the two groups are equal, and the default for R is to not make this assumption. [Some have argued](http://daniellakens.blogspot.ca/2015/01/always-use-welchs-t-test-instead-of.html) that people should just always run the Welch's t-test. The default in some other programs is to provide a Levene's statistic and then show you the results both with and without assuming equal variance.
+
+You can run a Levene's test by using the `leveneTest()` function from the "car" package. However, quite frankly, as argued in the link above, running this test is generally unnecessary, as the Welch's t-test will be the same as the Student t-test when variances are equal, and will be less biased when they are not. Regardless, my purpose here is not to argue about best practices. If you wish to assume equal variances, this is done by changing a single parameter:
+
+```{r indep.t2}
+t.test(data_men$Regret, data_women$Regret, var.equal=TRUE)
+```
+
+Finally, let's talk about a paired-sample t-test. In our sample dataset, we don't really have any repeated-measures data. However, the process for a paired-sample t-test is the same as for the independent samples above:
+
+```{r paired.t, eval=FALSE}
+t.test(variableT1, variableT2, paired=TRUE)
+```
+
+Replace the "variableT1" and "variableT2" with the names of your actual variables, and you're off to the races!
+
+### Formulas in R
+
+Before we get talking about our next subject, ANOVA, we need to first discuss formulas. For most statistical analyses in R, we need to create a formula that represents our model. (*Note:* There is a formula syntax for the t-test as well, which I didn't cover above. If you are interested, you can look at the documentation for the t-test function: `?t.test`.) Formulas in R are at the same time very simple, and yet very powerful and flexible. To really be able to do analyses effectively in R, you need a good grasp of formulas.
+
+Fundamentally, formulas are used to specify independent and dependent variables (IVs and DVs). The DV goes on the left side of the formula, and the IVs appear on the right. Let's start with a simple example -- our goal is to use an ANOVA, so we want to look at how our condition variable predicts regret. We would set up the formula like so:
+
+```{r formula, eval=FALSE}
+Regret ~ condition
+```
+
+You could read this as "Regret is predicted by condition". Let's say we then wanted to add a covariate, like chronic promotion focus. We would add it like so:
+
+```{r formula2, eval=FALSE}
+Regret ~ condition + Promotion
+```
+
+If we wanted to add an interaction term, we could use one of two notations. Let's say we want to know how gender interacts with condition to predict regret. Here's the long way:
+
+```{r formula3, eval=FALSE}
+Regret ~ condition + gender + condition:gender
+```
+
+This says "Regret is predicted by the main effect of condition, the main effect of gender, and the interaction between condition and gender." However, there is a shorthand notation:
+
+```{r formula4, eval=FALSE}
+Regret ~ condition * gender
+```
+
+The asterisk here tells R to include all the lower-order effects as well as the interaction term. So it would include the main effects as well.
+
+If you wanted to subtract out individual terms, you can use the minus sign to do so:
+
+```{r formula5, eval=FALSE}
+Regret ~ condition * gender - gender
+```
+
+That would be equivalent to the following:
+
+```{r formula6, eval=FALSE}
+Regret ~ condition + condition:gender
+```
+
+In other words, the main effect of condition, and the interaction between condition and gender, but not the main effect of gender. Typically, subtracting out terms is not so useful, but it can occasionally be handy if you want to test the change in R<sup>2</sup> for an individual term or set of terms.
+
+Once you get skilled at using formulas, there are all sorts of fancy things you can do. For example:
+
+```{r formula7, eval=FALSE}
+Regret ~ condition * (Promotion + Assessment)
+```
+
+This is equivalent to:
+
+```{r formula8, eval=FALSE}
+Regret ~ condition + Promotion + Assessment + condition:Promotion + condition:Assessment
+```
+
+In other words, you get the interactions with condition, but you don't get the `Promotion:Assessment` interaction or the three-way `condition:Promotion:Assessment` interaction.
+
+Finally, it's useful to realize that you can actually transform variables from within the formula itself. This can be really useful instead of creating new variables in your dataset for a single analysis you want to run. For example, let's say I wanted a quadratic term in my model. I could use the exponent notation (`^`) to specify that I want to square the term.
+
+```{r formula9, eval=FALSE}
+Regret ~ Promotion + Promotion^2
+```
+
+This will calculate the square of the Promotion variable on the fly and include it in your model. You could also log-transform or standardize a variable using the `log()` or `scale()` function, respectively. For instance:
+
+```{r formula10, eval=FALSE}
+log(Regret) ~ scale(Promotion)
+```
+
+However, sometimes you might want to use arithmetic to calculate a variable on the fly. Let's say for some reason we wanted to calculate the sum of participants' Promotion and Assessment scores and use that as a predictor. Trying this:
+
+```{r formula11, eval=FALSE}
+Regret ~ Promotion + Assessment
+```
+
+Will actually get you a model with the two variables as separate predictors. To use arithmetic in your formula, you need to use the `I()` function ("I" for "isolate"). Operators within this function will be treated like regular arithmetic operators.
+
+```{r formula12, eval=FALSE}
+Regret ~ I(Promotion + Assessment)
+```
+
+Now, R will first calculate the sum of each participants' Promotion and Assessment scores, and then include that as an individual predictor in the model.
+
+### ANOVA
+
+Now that we've got the hang of formulas, we can start talking about ANOVA. This discussion can be surprisingly tricky. The problem has to do with defaults. For ANOVA, R will calculate Type I sums of squares by default, unlike many other statistical programs (e.g., SPSS) which default to Type III sums of squares. For Type I SS, the order in which the variables are entered into the model will influence the p-value, whereas for Type III SS the order is irrelevant. Now, for some people, Type III SS is controversial, but in some fields that is the general assumption (largely because stats programs generate it by default). My goal here is not to wade into those waters. Wherever you stand, it is important to note that R provides Type I SS, and to get Type II or III instead requires a couple extra lines.
+
+You might ask why one would even bother doing ANOVA in R, then! And hey, I'm with you on that. ANOVA is just a special case of regression anyway, and R makes that particularly apparent given that its function for ANOVA literally just passes the model along to regression, and then calculates the SS from there! ANOVA and regression in R are virtually interchangeable. So quite honestly, my general approach is to reach for regression instead. However, some people like their F values -- and I must admit, that F distribution is particularly pleasant. So let's dive into ANOVA.
+
+The general function to calculate an ANOVA is `aov()`. We simply give it a formula, and tell it where to find the variables in the formula (if we don't specify that directly using the dollar sign notation), and it will fit an ANOVA model accordingly. Let's try using condition to predict regret, as we were working on above:
+
+```{r aov}
+aov.model <- aov(Regret ~ condition, data=data)
+summary(aov.model)
+```
+
+Note that the second argument is to specify the dataset -- it looks weird with `data=data`, but if our dataset were called "all_the_stuff" the argument would be `data=all_the_stuff`.
+
+The `aov()` function only fits the model. To get the information in an easy-to-read form, use the `summary()` function! This gives us the sums of squares, mean squares, F-value(s), and p-value(s).
+
+As I said, this will provide a Type I SS ANOVA. In this case, since we have only one variable in the model, that's fine. But to get a Type III SS requires two extra details. First, we set the contrasts to specify orthogonal contrasts:
+
+```{r contrasts}
+options(contrasts=c("contr.helmert", "contr.poly"))
+```
+
+This sets the options globally, so you only need to specify this once (I'd suggest putting it at the top of your document). R has a number of built-in contrasts, so if you want more information about what this means, check out `?contrasts`.
+
+The second thing we do is use the `Anova()` function from the "car" package. ("car" stands for "Companion to Applied Regression", and has nothing to do with motor vehicles.) Let's install that package, load it, and then run a Type III SS ANOVA.
+
+```{r car, eval=FALSE}
+install.packages("car")
+```
+
+```{r car2, warning=FALSE, message=FALSE}
+library(car)
+```
+
+```{r Anova}
+Anova(aov.model, type=3)
+```
+
+Again, here, because we only have one variable in our model, the Type I vs. Type III SS doesn't make a difference. But let's look at a case where it might. Let's run a factorial 3 x 2 ANOVA, with condition and gender interacting to predict regret.
+
+First, let's just do a little cleanup of our gender variable -- we have a few people who did not identify their gender. Right now gender is specified as a character vector, and thus missing values just have an empty string ("") rather than being indicated as missing values (NA). There are a number of ways we could do this, but for right now, let's just create a new dataset that filters out the non-responses:
+
+```{r gender.filter}
+data_with_gender <- filter(data, gender != "")
+```
+
+The `!=` here means "not equal", so we are selecting only participants who do *not* have gender as an empty string. Then, we can create our factorial ANOVA:
+
+```{r factorial.anova}
+factorial.aov <- aov(Regret ~ condition * gender, data=data_with_gender)
+summary(factorial.aov)
+Anova(factorial.aov, type=3)
+```
+
+First, we fit our model -- making sure to specify that our data is now coming from the `data_with_gender` dataset. We then print the default Type I SS result using the `summary()` function, and follow it up with the Type III SS with the `Anova(type=3)` function. As you can see, now our results are different! The last predictor (the interaction term, in this case) will always be the same regardless of Type I or Type III, but the other predictors in the model will show different patterns. Here, of course, the difference doesn't meaningfully impact the conclusions we can draw, but in some cases this may lead to drastic differences.
+
+We can see that we have a main effect of gender here. Since F-values aren't directional, one thing that can be useful with ANOVA is to get the adjusted means for the design. For this we can use the `model.tables()` function, like so:
+
+```{r model.tables}
+model.tables(factorial.aov, type="means")
+```
+
+Here we can get the grand mean, as well as the adjusted means for each effect in the model: split by conditon, split by gender, or split by both condition and gender. The "rep" that appears in the tables is the number of cases in each group.
+
+We may also want to run some post hoc tests. People can be very argumentative about their post hoc tests, but let's cover a few of them. Let's start off with a Tukey HSD test for the condition variable. (We wouldn't normally do that, since the effect isn't significant, but this is a tutorial, not a publication.)
+
+```{r tukey}
+TukeyHSD(factorial.aov, which="condition")
+```
+
+As you can see, it performs all the pairwise comparisons between the three conditions and gives us an adjusted p-value and the 95% confidence intervals.
+
+We could also run pairwise t-tests, corrected with a Bonferroni correction:
+
+```{r bonferroni}
+pairwise.t.test(data_with_gender$Regret, data_with_gender$condition, p.adj="bonferroni")
+```
+
+Unfortunately, this only gives you the corrected p-values, and not the t-values as well, so you'll need to use the `t.test()` function mentioned above to calculate the latter.
+
+(The `pairwise.t.test()` function also includes several other correction methods, including the Holm method, which you can find in the documentation for the function.)
+
+I can't possibly cover all the types of post hoc tests and all their variants, but if you're hunting around for a specific one, you might want to look at the "agricolae" package, which includes another function for Tukey HSD, plus ones for Fisher's LSD, Kruskal-Wallis, Duncan's test, Durbin test, Scheffe test, Student-Newman-Keuls, and more I've never even heard of. There is also a "multcomp" package that includes functions that adjust some post hoc tests for within-subjects designs.
+
+#### A Note about Repeated Measures ANOVA
+
+R does have a method to do repeated measures ANOVA, and it involves specifying an Error term in the model formula. To be honest, I don't frequently use repeated measures designs, so my experience with repeated measures ANOVAs in R is limited. However, when I have tried, I have sometimes run into issues with unbalanced designs and/or missing data. [Here's](https://www.r-bloggers.com/two-way-anova-with-repeated-measures/) a reasonable tutorial that can help with how to specify a within-subjects factorial design. You may also want to consider the "ez" package that boasts an `ezANOVA()` function. But if you find yourself running into issues with missing data, you should consider multi-level modelling instead, which handles repeated measures designs with missing or unbalanced data. Multi-level models can obviously have complexities of their own, but in the next lesson we'll cover some simple models that should help you with analyzing repeated measures designs.
+
+### Chi-Squared Tests
+
+Finally, before we end this lesson off, let's talk a little bit about chi-squared tests. These are used with count data, and we can do a one-way (goodness of fit test) or two-way (correlation) chi-squared.
+
+When using count data, the `table()` function is a good place to start. All it does is counts rows in given groups. If more than one variable is given to the function, it creates a table with that number of dimensions. For example, here are a couple tables:
+
+```{r table}
+table(data_with_gender$condition)
+table(data_with_gender$gender, data_with_gender$condition)
+```
+
+As you can see, in the first example, we just get the number of participants in each condition. That's handy for figuring out if your random assignment worked reasonably well! In the second example, we are just counting up the number of men and women in each condition.
+
+If you find it helpful to include the marginal totals, you can use `addmargins()`:
+
+```{r margins}
+addmargins(table(data_with_gender$gender, data_with_gender$condition))
+```
+
+(*Note:* `addmargins()` isn't just limited to calculating the sum. You can pass through any function you wish, like means or medians; but with count data like this, the default of calculating the sum probably makes the most sense.)
+
+Finally, you might find it useful to calculate the cells as proportions of the total; one way to do this is as follows:
+
+```{r table2}
+table(data_with_gender$gender, data_with_gender$condition)/nrow(data_with_gender)
+```
+
+All this does is calculates the regular table, and then divides each number by the total number of rows in the dataset. Now you have proportions!
+
+Now that we've gotten the hang of the `table()` function and visualized our data, let's figure out the chi-squared test. We'll start out with a one-way chi-squared:
+
+```{r chi.square}
+chisq.test(table(data_with_gender$condition))
+```
+
+As you can see, we use the `chisq.test()` function, but we pass it our table. This will give us a goodness of fit test -- if we were to assume that the probabilities for these conditions were equal, how well does this data fit that expectation? Turns out...quite well! I can assure you that I randomly assigned participants to condition in this study, so in this case we're essentially just testing how well that worked.
+
+Let's try one more one-way chi-squared. In this study, we gave participants a decision task -- we showed them information for a number of vehicles, and asked them to choose the one they preferred. In the variable "productChoice", we have the numeric index of the vehicle they selected. I want to know whether vehicles were reasonably equally likely to be selected by participants. To make this a little clearer, I first recode the "productChoice" variable to include the actual names of the vehicles.
+
+```{r recode}
+carNames <- c("Chevrolet Sonic", "Honda Civic", "Kia Sportage", "Nissan Frontier", "Volkswagen Jetta", "Ford Fiesta", "Hyundai Elantra", "Mitsubishi RVR", "Toyota Tacoma", "Volvo C30", "Honda Fit", "Kia Forte", "Nissan Pathfinder", "Volkswagen Tiguan", "Chevrolet Volt", "Hyundai Accent", "Mitsubishi Lancer", "Toyota Rav4", "Volvo XC90", "Ford Fusion")
+
+data$choiceWithNames <- factor(data$productChoice, labels=carNames)
+```
+
+Now, let's look at a table of participants' selections, and then test the goodness of fit with the assumption that they were equally likely to be selected.
+
+```{r chi.square2}
+choices <- table(data$choiceWithNames)
+choices
+chisq.test(choices)
+```
+
+So, it looks like perhaps I haven't done a great job selecting equally good vehicles. (That's fine, for my purposes, as long as they aren't too lopsided.) Only one person each selected the Tacoma and the Volt, and people tended to gravitate toward the Forte, the Jetta, and the Civic. And when we look at the chi-squared test, it turns out that this distribution is *not* consistent with an equal-chance model. Well...perhaps I'll send this data to Toyota and Chevrolet so they can boost their ad campaigns for next year.
+
+Let's try a two-way chi-squared test. Now I want to see whether our manipulation had any effect on which car participants chose. The process for the two-way chi-squared is very similar to the one-way:
+
+```{r chi.square3}
+choices.by.condition <- table(data$choiceWithNames, data$condition)
+choices.by.condition
+twoway.chi <- chisq.test(choices.by.condition)
+twoway.chi
+```
+
+Now, when we run this, we can see that R gives us a warning message that the chi-squared approximation may be incorrect. This happens because some of our expected cell values are below 5, which may lead to poor estimates. Let's take this opportunity to both investigate what's going on in more detail, and also learn something new about how R operates!
+
+In many cases, when you run a statistical function like ANOVA, chi-squared, etc., the output of that function is an object that can have quite a lot of information. In the case of `chisq.test()`, the output includes the observed and expected counts, as well as residuals, etc. You can see everything the output includes by looking at the documentation for the `chisq.test()` function. But the handy thing about R is that you can capture this information and ask for a specific piece! We want to see the expected counts, and the documentation tells us that there is a component in the output called "expected". We stored the output from our chi-squared analysis above in a variable called "twoway.chi", so let's grab the information we want from it:
+
+```{r chi.square4}
+twoway.chi$expected
+```
+
+As you can see, we used the dollar sign notation to ask for the "expected" component. This doesn't always work -- it depends on how the output is stored, and that will vary from function to function. But often you can get output this way, especially if you see a list of named components in the "Value" section of the documentation. You can also use the `str()` function to inspect the structure of the output, which can give you hints about how to get what you want!
+
+So we can see that many of these expected counts are below 5, which is obviously not ideal. One thing we could do is drop some of the less-popular choices and run it again. But another option is to use simulation to estimate the corrected p-value, which the `chisq.test()` function can do for us. (Read the details about how these simulations are run in the function documentation.) Let's do that. We have to specify that we want the p-value simulated, and then we indicate how many samples to run -- let's go for 5000.
+
+```{r chi.square5}
+chisq.test(table(data$choiceWithNames, data$condition), simulate.p.value=TRUE, B=5000)
+```
+
+Now, we get a somewhat lower p-value, and we don't get that warning about incorrect approximations. Hooray!
+
+This lesson has gone over some of the basics of t-tests, ANOVAs, and chi-squared tests in R. As I have mentioned, I can't possibly cover all the nuances of each of these tests -- these tests have been applied to many specialized designs, and I have neither the expertise nor the patience to cover them all. But the lesson we've covered should give you what you need to run basic models, and also a starting point to figure out how to deal with models of greater complexity. The next lesson will cover some more important inferential statistics, including correlation, regression, and multi-level models.
