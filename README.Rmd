@@ -23,5 +23,6 @@ The current table of contents is as follows:
 2. Reading in Data
 3. Viewing and Cleaning Data
 4. Working with Data
+5. Descriptive Statistics and Composite Scores
 
 This tutorial is free to use and distribute, and is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).

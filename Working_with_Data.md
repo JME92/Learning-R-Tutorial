@@ -367,19 +367,6 @@ After you have installed a package, you need to *load* it onto your current R se
 library(dplyr)
 ```
 
-```
-## 
-## Attaching package: 'dplyr'
-## 
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-## 
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
 (As you can see from the output above, loading the package already has created some "conflicts" with other packages. In the case of dplyr, this is intentional, as it is specifically designed to overrule some of the other basic functions in R. But in general, it's important to note when these conflicts occur. If you really need a specific function from *this* package rather than *that* package, you can use the double colon notation to specify which one you want. For the above case, if I really wanted the "filter" function from the stats package, I would use `stats::filter()`.)
 
 Often, when researchers write their code to analyze a set of data, they'll put the packages they need to load right at the top. That just makes it easy for them and others to know what packages are needed, and to load them right away.

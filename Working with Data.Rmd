@@ -197,7 +197,7 @@ As you can see, we give the function a character vector with the name(s) of the 
 
 After you have installed a package, you need to *load* it onto your current R session. **To use a package, you need to load it every session you wish to use it.** The reason for this is simple: With thousands of packages, the chance of having two packages with the same function names increases. If R just loaded every package you have ever installed, it would get very difficult to avoid conflicts like this. So R only loads the basic functionality to start off, and then you can tell it which packages you want to use this time. Here's how you load a package into an R session:
 
-```{r load.packages}
+```{r load.packages, warning=FALSE, message=FALSE}
 library(dplyr)
 ```
 
