@@ -1,0 +1,252 @@
+---
+title: "Inferential Statistics Part 2"
+author: "Jeff Hughes"
+date: "August 12, 2016"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r start, include=FALSE}
+library(dplyr)
+data <- read.csv("data/maximizing_data.csv", stringsAsFactors=FALSE)
+data$startDateTime <- as.POSIXct(strptime(paste(data$startDate, data$startTime), format="%d/%m/%Y %H:%M:%S"))
+data$endDateTime <- as.POSIXct(strptime(paste(data$endDate, data$endTime), format="%d/%m/%Y %H:%M:%S"))
+data$condition <- factor(data$condition, labels=c("Promotion", "Assessment", "Control"))
+
+data$RFQ_1.R <- 6 - data$RFQ_1
+data$RFQ_2.R <- 6 - data$RFQ_2
+data$RFQ_4.R <- 6 - data$RFQ_4
+data$RFQ_6.R <- 6 - data$RFQ_6
+data$RFQ_8.R <- 6 - data$RFQ_8
+data$RFQ_9.R <- 6 - data$RFQ_9
+data$RFQ_11.R <- 6 - data$RFQ_11
+data$RM_2.R <- 7 - data$RM_2
+data$RM_10.R <- 7 - data$RM_10
+data$RM_13.R <- 7 - data$RM_13
+data$RM_24.R <- 7 - data$RM_24
+data$RM_27.R <- 7 - data$RM_27
+data$MI_22.R <- 7 - data$MI_22
+data$regret6.R <- 8 - data$regret6
+
+data$Promotion <- rowMeans(select(data, RFQ_1.R, RFQ_3, RFQ_7, RFQ_9.R, RFQ_10, RFQ_11.R), na.rm=TRUE)
+data$Assessment <- rowMeans(select(data, RM_2.R, RM_6, RM_7, RM_9, RM_10.R, RM_11, RM_15, RM_19, RM_20, RM_22, RM_27.R, RM_30), na.rm=TRUE)
+data$HighStandards <- rowMeans(select(data, MTS_1:MTS_9), na.rm=TRUE)
+data$AlternativeSearch <- rowMeans(select(data, MI_23:MI_34), na.rm=TRUE)
+data$DecisionDifficulty <- rowMeans(select(data, MI_11:MI_21, MI_22.R), na.rm=TRUE)
+data$TaskDifficulty <- rowMeans(select(data, difficulty, frustration, struggle), na.rm=TRUE)
+data$Reconsideration <- rowMeans(select(data, reconsider1:reconsider4), na.rm=TRUE)
+data$Regret <- rowMeans(select(data, regret1:regret5, regret6.R), na.rm=TRUE)
+data$Conviction <- rowMeans(select(data, conviction1:conviction5), na.rm=TRUE)
+```
+
+# Learning R Tutorial: A Process-Focused Approach
+
+## Inferential Statistics, Part 2: Correlation, Regression, and Multi-Level Models
+
+Welcome to part 2 of the lesson on inferential statistics! The statistical tools I am about to show you are some of the tools I most commonly use in R. The tools being covered today tend to deal primarily with continuous variables: correlation, regression, and multi-level modelling (although all these techniques can obviously be used with categorical variables as well). But we have a lot to cover in this lesson, so let's get started!
+
+### Correlation
+
+There are a number of ways to do correlation with R, all of which are fairly easy, but it can be easy to get confused between the methods. To start, we can just test a single correlation between two variables:
+
+```{r cor.test}
+cor.test(data$Promotion, data$HighStandards)
+```
+
+As you can see, this tells us what type of correlation was run (either Pearson, Kendall, or Spearman, which can be set manually via the `method` argument). It also gives us the correlation at the bottom, plus a significance test and 95% confidence interval.
+
+But perhaps you would like to calculate a number of correlations at once. We can easily create a covariance or a correlation matrix:
+
+```{r cor}
+library(dplyr)
+
+cov(select(data, Promotion, Assessment, HighStandards, AlternativeSearch, DecisionDifficulty))
+cor(select(data, Promotion, Assessment, HighStandards, AlternativeSearch, DecisionDifficulty))
+```
+
+(We've loaded the "dplyr" package to take advantage of the `select()` function. The `cov()` and `cor()` are in the default packages loaded when R starts.)
+
+"Well now," you say, "that's pretty nifty, but I'd like to have significance tests for all those correlations!" That's certainly possible as well, with the `corr.test()` function in the "psych" package. Note that it is "corr" with two r's this time.
+
+```{r corr.test}
+library(psych)
+
+corr.test(select(data, Promotion, Assessment, HighStandards, AlternativeSearch, DecisionDifficulty))
+```
+
+Now we get the same correlation matrix at the top, but we also get the sample size (if the sizes differ for some correlations, the sample size will be a matrix of the same size as the correlation matrix). Finally, we get the p-values at the bottom. Note that the p-values *above* the diagonal are adjusted (Holm correction, by default, but this can be changed), and the p-values *below* the diagonal are unadjusted.
+
+Finally, what if you want to correlate just *one* variable with a number of others? The `corr.test()` function can handle this too, by specifying a `y` argument:
+
+```{r corr.test2}
+corr.test(x=select(data, Assessment, HighStandards, AlternativeSearch, DecisionDifficulty), y=as.data.frame(data$Promotion))
+```
+
+Note that the `y` argument expects a matrix or data frame, so we've converted our single column into a data frame first.
+
+### Linear Regression
+
+Running a basic linear model is much the same as running an ANOVA was, which we learned last lesson -- but without all the complications of Type I or Type III SS. Regression uses the same formula syntax, but we provide it to the `lm()` (for "linear model") function. Let's say we wanted to use our measures of high standards and alternative search to predict regret on the decision task. We could do it like so:
+
+```{r lm}
+reg_model <- lm(Regret ~ HighStandards + AlternativeSearch, data=data)
+summary(reg_model)
+```
+
+Like an ANOVA, first we fit the model using the `lm()` function. Then we call the `summary()` function to get the coefficients and significance values. Here we can see that high standards had a marginal negative association with regret, while alternative search had a significant positive association. We also get some information about the R-squared, and the F-statistic for the entire model.
+
+These values are in unstandardized form, and that's the only thing that R provides. If you wanted standardized coefficients, you would have to first standardize your variables, and then run the regression model again, something like this:
+
+```{r lm2}
+reg_model.std <- lm(scale(Regret) ~ scale(HighStandards) + scale(AlternativeSearch), data=data)
+summary(reg_model.std)
+```
+
+The `scale()` functions standardize each of our variables, and now the output provides us with the standardized beta.
+
+However, this can be kind of a pain to do repeatedly, so a while back I created an R package with some useful functions for regression (as well as ANOVA and multi-level models). It's called the "reghelper" package. Right now it is not yet available on CRAN, but it is on [Github](https://github.com/jeff-hughes/reghelper), and you can easily install it like so:
+
+```{r reghelper, eval=FALSE}
+install.packages("devtools")
+devtools::install_github("jeff-hughes/reghelper")
+```
+
+First we install the "devtools" package, which gives us the very useful `install_github()` function. Many, many packages are available on CRAN, but looking on Github provides an even greater wealth of packages from excellent R researchers and programmers.
+
+After installing the reghelper package, we can load it and use the `beta()` function to automatically calculate standardized betas.
+
+```{r beta}
+library(reghelper)
+
+beta(reg_model)
+```
+
+Note that within rounding error, this analysis provides the same results as the one above.
+
+<aside>The reghelper package contains a number of other useful functions, especially for people who are used to the way regression is handled in SPSS. The `beta()` function provides standardized betas, and the `build_model()` function provides a similar "build-up" approach that adds variables in one block at a time. Unlike the cumbersome SPSS, the reghelper package includes a `graph_model()` function that easily graphs interactions from a fitted model, and the `simple_slopes()` function that automatically calculates all the simple effects of an interaction. It's still admittedly a work in progress, but these are functions I created because I found them useful while doing my own research. I hope you'll find them useful as well.</aside>
+
+So how does R deal with categorical variables in regression? Let's throw in the condition variable (which, if you'll recall, has three conditions), and see what happens:
+
+```{r categorical}
+model.cat <- lm(Regret ~ condition, data=data)
+summary(model.cat)
+```
+
+As you can see, because we had our condition variable set as a factor, R helpfully created the appropriate number of dummy codes for us and put them both in the model. By default, the comparison group (the group coded as "0" for all the dummy codes) is the first level of the factor, which in this case is the Promotion condition. We can take a look at the contrasts that R is using with the `contrasts()` function:
+
+```{r contrasts}
+contrasts(data$condition)
+```
+
+The three levels appear on the left, and each column represents a dummy code. But we can also change the contrasts, if we don't like them. There are some presets that we can select (see the `contrasts()` documentation for more details), or we can directly provide contrasts, which is my preference. Let's change the comparison group to be the Control condition instead of the Promotion condition.
+
+```{r contrasts2}
+contrasts(data$condition) <- matrix(c(1, 0, 0,
+                                      0, 1, 0), ncol=2)
+colnames(contrasts(data$condition)) <- c("Promotion", "Assessment")  # rename the column names
+contrasts(data$condition)
+```
+
+Because we have more than one row and column, we use a 3 x 2 matrix to set the new contrasts. (If you're getting confused with how to read it, remember that by default, matrices fill in the data going *down each column*.) Now, our Control condition is coded as (0, 0) instead. Let's rerun our regression model and see what happens:
+
+```{r categorical2}
+model.cat2 <- lm(Regret ~ condition, data=data)
+summary(model.cat2)
+```
+
+Now we get two different dummy codes: Promotion compared to the Control condition, and Assessment compared to the Control condition. Great! Note that this same approach can be used to use effects coding instead of dummy coding, or more complex contrasts. Anything you want, really.
+
+When you have multiple dummy codes representing a single variable, it can be helpful to assess the overall impact of that variable. For that, you can use the `anova()` function (note that this is different from the `aov()` or the `Anova()` functions we learned about in the last lesson!). When given a single fitted model, this function provides an F value for each conceptual variable:
+
+```{r anova}
+anova(model.cat2)
+```
+
+This F value represents the overall effect of condition on regret, and is equivalent to the F-test for the change in R-squared when that variable is entered into the model. We can show this by examining the other way to use the `anova()` function: to compare multiple nested models:
+
+```{r anova2}
+model.nopredictors <- lm(Regret ~ 1, data=data)  # the '1' represents the intercept for the model
+model.condition <- lm(Regret ~ condition, data=data)
+anova(model.nopredictors, model.condition)
+```
+
+Now, the `anova()` function is comparing these two models to each other. It takes the difference in the degrees of freedom, and the difference in the sums of squares, and calculates an F-value and p-value. Were this p-value significant, it would suggest that the second model explained significantly more variance than the first model. In other statistical programs, this is sometimes provided as a test of the change in R-squared. But note that the F and p we get here are identical to the one that we found above. This is because our second model only added a single variable, condition, to the model. Both of them are thus testing the effect of adding condition to the model.
+
+#### Other Types of Regression
+
+There are, of course, many variants of linear regression. Many of these are extensions of the generalized linear model, which can handle various kinds of non-continuous data. R can calculate these models using the `glm()` function. In particular, one common type of GLM is the binary logistic regression model. We don't really have any appropriate data in our sample dataset to use this. But in general, logistic regression can be done as follows:
+
+```{r glm, eval=FALSE}
+log.reg <- glm(binaryDV ~ predictors, family="binomial", data=data)
+```
+
+All the same principles apply as for linear regression -- it relies on the formula notation, which can include multiple predictors and moderators, etc. Note that the `family` argument can take a number of distributions, including Gamma, poisson, etc.. And each family can take different link functions -- the binomial family, for instance, uses the "logit" function by default, but can also use "probit", "log", and others; please see `?glm` and `?family` for more details.
+
+### Multi-Level Models
+
+Getting into the nuances of multi-level models (MLM) is far beyond the scope of this tutorial. However, R includes a couple of very powerful packages for multi-level modelling, so this section will provide a starting point to show you the basics. Those needing more complex models will hopefully be able to find what they're looking for by examining the documentation of the packages and functions below.
+
+The R distribution provided on CRAN includes the "nlme" package, which is one of the two primary MLM packages. The package includes the `lme()` function, which works very similarly to the regression function above. Again, we don't really have any repeated measures or otherwise nested data in our sample dataset, but here's an example using a dataset built into R:
+
+```{r lme}
+library(nlme)
+
+mlm1 <- lme(distance ~ age, data=Orthodont, random=~age|Subject)
+summary(mlm1)
+```
+
+The "Orthodont" dataset includes data about some measures of teeth distances taken by several participants over a period of some years. The key thing to note here is that each participant had multiple measures taken, when they were at different ages. Thus, "Subject" is our participant identifier, age is a designation of time, and distance is the actual measurement taken.
+
+In the analysis above, we are using age to predict distance, and the formula here looks quite like the regular formula notation we are now used to working with. The key addition with the `lme()` function is the `random` argument. This works as follows:
+
+* It will always start with a tilde (~), because the idea is that this is a "one-sided formula".
+* Variables between the tilde and the vertical pipe (|) are the random effects. We could create a random intercepts model for the above model by using `~1|Subject`; or we can use a random intercepts and slopes model by using `~age|Subject` (the intercept here is implied; to exclude the random intercept, you can use `~0+age|Subject`).
+* Variables after the vertical pipe are the grouping variable(s). Here we just have one grouping variable, Subject, but more variables can be included by separating them with forward slashes (/).
+
+When we examine the output from the `summary()` function, we can see that we get some model fit statistics (AIC, BIC, and log likelihood); we get the standard deviations of the random effects; and we get coefficients for our fixed effects. As you can see, we have quite a large amount of variation of our intercepts (i.e., participants started off with different tooth distances), and we also have some variation in slopes as a result of age/time (i.e., participants' tooth distances grew at different rates). But our fixed effects show that on average, participants started off with a distance of 16.76 (whatever the hell that means; I am not a dentist), and increased over time. Good to know people's mouths were growing rather than shrinking.
+
+There are lots of parameters that you can set with the `lme()` function, including specific correlation structures, weights, and contrasts. Please see the function documentation for more details.
+
+The second function for dealing with MLM is actually an updated version of the "nlme" package we just saw above. This updated package is called "lme4", and it has at least a couple major advantages over its predecessor. For one thing, it's much faster. (Though to be honest, I have never really had much of an issue with the speed of nlme.) Second, it extends MLM to a number of other link functions so you can fit non-normal or non-continuous outcome variables (e.g., multi-level logistic regression).
+
+However, lme4 can also come with some potential downsides. For one thing, it doesn't offer nearly as much control over the covariance structure as the nlme package does. If this is important for your work, then stick with nlme. Second, the lme4 package does not calculate p-values. This may seem like a major downside for some people, but the [author of the package has written](https://stat.ethz.ch/pipermail/r-help/2006-May/094765.html) about why p-values are not included -- essentially, because lme4 can handle more complex designs like crossed random effects, unbalanced designs with multiple strata, etc., it is difficult to really justify what a proper p-value should be. But for those of you who are clutching your pearls in horror, never fear. 
+
+```{r lme4, eval=FALSE}
+install.packages("lme4")
+```
+
+```{r lme4_2, warning=FALSE, message=FALSE}
+library(lme4)
+
+mlm2 <- lmer(distance ~ age + (age|Subject), data=Orthodont)
+summary(mlm2)
+```
+
+Here we can see that the `lmer()` function in the lme4 package handles the notation for the random effects a little different. It's still generally the same, but the random effects are included in parentheses at the end of the overall formula instead of in their own argument.
+
+If we compare the output from this to the output from the `lme()` function, we can see that everything was calculated the same. The only difference is that we no longer have p-values. However, if you really want to have your lme4 and eat your p-values too, you can use the "lmerTest" package, which calculates p-values based on Satterthwaite's approximations. Let's try it out.
+
+```{r lmerTest, eval=FALSE}
+install.packages("lmerTest")
+```
+
+```{r lmerTest2, warning=FALSE}
+library(lmerTest)
+
+mlm3 <- lmer(distance ~ age + (age|Subject), data=Orthodont)
+summary(mlm3)
+anova(mlm3)
+```
+
+As you can see, when we load the "lmerTest" package, it overwrites the `lmer()` function, so that now when we run that function, it gives us the new output with p-values. In addition, we can use the `anova()` function to get F-values and p-values as well -- this was also not available with lme4.
+
+So with all those caveats, which should you use? My preference is still for nlme, personally. I don't typically have a use for the more complex designs that lme4 specializes in. In addition, I happen to like seeing p-values, even if they are just approximations. Finally, there's been at least one occasion where I needed to specify a more complex covariance structure, and the nlme package provides greater flexibility in that regard. But ultimately, it's important to know that both exist, and to make your own judgment based on what your research requires.
+
+This concludes our lessons on inferential statistics! I hope it has given you some of the basic tools needed to analyze your data in R. And please remember that we are only scratching the surface here -- many of the R packages out there are written by expert statisticians and quantitative methodologists, so there are incredibly powerful packages for almost any analysis you might need to run. What's important is that you know what the basics are, so that when you need to branch out into more complex statistical tools, you have a starting point from which to look. Google is your friend here -- search for the analysis you need to do, and you'll almost surely find information on how to do it in R.
+
+Our next lesson is a crucial one. After talking about statistical tools, we are going to move back toward more of the programming side of R. But please, don't skip this lesson! One of the biggest reasons to learn R is that it can greatly improve your efficiency when analyzing data, because of the ability to use greatly time-saving techniques that aren't easily available in more point-and-click statistical programs. Learning how to program effectively in R will help you take advantage of R's greatest features. So this next lesson will teach you to use the power of R to analyze your data more quickly and efficiently, so you can finish up your analyses and go play in the sunshine. Or write a song. Or read a book. Or whatever is more fun to you than analyzing data...
