@@ -13,7 +13,7 @@ The current table of contents is as follows (italicized chapters are not yet ava
 5.  Descriptive Statistics and Composite Scores
 6.  Inferential Statistics, Part 1: t-test, ANOVA, and Chi-Square
 7.  Inferential Statistics, Part 2: Correlation, Regression, and Multi-Level Models
-8.  *Important Syntax Structures* (functions, conditionals, if-else, loops, apply, plyr)
+8.  Important Syntax Structures (functions, conditionals, if-else, loops, apply, plyr)
 9.  *Graphing Like a Boss*
 10. *Special Topics: Factor Analysis*
 11. *Special Topics: Mediation*
