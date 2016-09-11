@@ -22,16 +22,19 @@ The current table of contents is as follows (italicized chapters are not yet ava
 1. Introduction
 2. Reading in Data
 3. Viewing and Cleaning Data
-4. Working with Data  <!-- TODO: Add logical vectors, conditionals, and ifelse() -->
+4. Working with Data
 5. Descriptive Statistics and Composite Scores
 6. Inferential Statistics, Part 1: t-test, ANOVA, and Chi-Square
 7. Inferential Statistics, Part 2: Correlation, Regression, and Multi-Level Models
-8. Important Syntax Structures <!-- TODO: Add if-else -->
+8. Important Syntax Structures
 9. *Graphing Like a Boss*
 10. *Special Topics: Factor Analysis*
 11. *Special Topics: Mediation*
 11. *Special Topics: Structural Equation Modelling*
 12. *Other Packages to Check Out*
 13. *Getting the Most Out of R*
+
+[comment]: # (TODO: Add logical vectors, conditionals, and ifelse() to lesson 4)
+[comment]: # (TODO: Add if-else structure to lesson 8)
 
 This tutorial is free to use and distribute, and is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
